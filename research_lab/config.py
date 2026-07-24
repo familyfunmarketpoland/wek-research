@@ -20,6 +20,55 @@ EXPECTED_TRIAL_COUNTS = {
 }
 EXPECTED_TOTAL_TRIALS = 186
 
+_EXPECTED_AMENDMENT = {
+    "amendment_id": "P2-05C",
+    "status": "clarification",
+    "recorded_before_first_h1_h6_outcome_calculation": True,
+    "outcomes_calculated_before_amendment": False,
+    "scope": "Clarifies PnL accounting, undefined Sharpe handling, and q95 interpolation.",
+    "changes_hypotheses": False,
+    "changes_candidate_grids": False,
+    "changes_candidate_count": False,
+    "changes_thresholds": False,
+    "changes_pass_rules": False,
+}
+_EXPECTED_PNL_MODEL = {
+    "name": "synthetic_constant_1x",
+    "capital_model": "synthetic constant-1x",
+    "position_values": [-1, 0, 1],
+    "position_timing": "p is known at the bar open",
+    "cost_variable": "cost equals costs.cost_rate_per_side (0.0015)",
+    "bar_multiplier_formula": (
+        "(1+p_prev*(open/prev_close-1))*(1-cost*abs(p-p_prev))*(1+p*(close/open-1))"
+    ),
+    "fold_start": {"starts_flat": True, "p_prev": 0},
+    "terminal_liquidation": {
+        "enabled": True,
+        "timing": "after the final bar multiplier",
+        "multiplier_formula": "1-cost*abs(p_final)",
+    },
+    "reversal": {
+        "absolute_position_change": 2,
+        "cost_multiplier_formula": "1-cost*2",
+    },
+    "observed_and_permutation_use_identical_model": True,
+}
+_EXPECTED_SHARPE_HANDLING = {
+    "observed_undefined_or_zero_variance_result": "NaN",
+    "undefined_observed_candidate_can_pass": False,
+    "observed_candidate_value_is_not_imputed": True,
+    "family_only_undefined_trial_sharpe_fallback": {
+        "value": 0.0,
+        "scopes": ["dsr_family_sigma_sr", "permutation_family_max"],
+    },
+}
+_EXPECTED_Q95 = {
+    "quantile": 0.95,
+    "numpy_function": "numpy.quantile",
+    "method": "linear",
+    "formula": "numpy.quantile(null_max_sharpes, 0.95, method='linear')",
+}
+
 
 class ConfigValidationError(ValueError):
     """Raised when the pre-registered study configuration drifts from the frozen design."""
@@ -108,6 +157,8 @@ def validate_preregistered_config(config: Mapping[str, Any]) -> Mapping[str, Any
     plain = _to_plain(config)
     if plain["study"]["packet_reference"] != "P2-05-PREREG-CONFIG":
         raise ConfigValidationError("Unexpected packet reference.")
+    if plain["study"]["amendment"] != _EXPECTED_AMENDMENT:
+        raise ConfigValidationError("P2-05C amendment metadata drifted from the frozen clarification.")
 
     symbols = plain["universe"]["symbols"]
     if symbols != list(EXPECTED_SYMBOLS):
@@ -122,6 +173,9 @@ def validate_preregistered_config(config: Mapping[str, Any]) -> Mapping[str, Any
         raise ConfigValidationError("Entry and exit costs must remain frozen at 10 bps fee and 5 bps slippage.")
     if costs["cost_rate_per_side"] != 0.0015:
         raise ConfigValidationError("Cost rate per side must equal fee plus slippage.")
+
+    if plain["pnl_model"] != _EXPECTED_PNL_MODEL:
+        raise ConfigValidationError("Synthetic constant-1x PnL model drifted from the frozen clarification.")
 
     windows = plain["rolling_windows"]
     if windows["rolling_year_bars"] != {"1h": 8760, "4h": 2190}:
@@ -150,6 +204,8 @@ def validate_preregistered_config(config: Mapping[str, Any]) -> Mapping[str, Any
     multiple_testing = plain["multiple_testing"]
     if multiple_testing["candidate_count"] != EXPECTED_TOTAL_TRIALS:
         raise ConfigValidationError("Candidate count must remain frozen at 186.")
+    if multiple_testing["sharpe_handling"] != _EXPECTED_SHARPE_HANDLING:
+        raise ConfigValidationError("Undefined-Sharpe handling drifted from the frozen clarification.")
     dsr = multiple_testing["deflated_sharpe_ratio"]
     if (
         not dsr["enabled"]
@@ -191,6 +247,7 @@ def validate_preregistered_config(config: Mapping[str, Any]) -> Mapping[str, Any
         or permutation["seed_mode"] != "deterministic numpy SeedSequence seeded with 42"
         or permutation["family_null"] != "maximum Sharpe across all 186 candidates"
         or permutation["null_summary"] != "best-of-all-candidates null Sharpe across the full frozen family for each permutation draw"
+        or permutation["q95"] != _EXPECTED_Q95
         or permutation["empirical_p_formula"] != "(1 + count(null >= observed)) / 501"
         or not permutation["pass_rule"]["observed_sharpe_strictly_above_q95"]
         or permutation["pass_rule"]["empirical_p_lte"] != 0.05

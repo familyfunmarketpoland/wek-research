@@ -53,6 +53,46 @@ def test_validator_derives_exact_trial_counts_and_total() -> None:
     assert sum(counts.values()) == EXPECTED_TOTAL_TRIALS == 186
 
 
+def test_validator_enforces_pre_outcome_clarification_metadata() -> None:
+    config = _mutable_config()
+    amendment = config["study"]["amendment"]
+
+    assert amendment == {
+        "amendment_id": "P2-05C",
+        "status": "clarification",
+        "recorded_before_first_h1_h6_outcome_calculation": True,
+        "outcomes_calculated_before_amendment": False,
+        "scope": "Clarifies PnL accounting, undefined Sharpe handling, and q95 interpolation.",
+        "changes_hypotheses": False,
+        "changes_candidate_grids": False,
+        "changes_candidate_count": False,
+        "changes_thresholds": False,
+        "changes_pass_rules": False,
+    }
+
+    config["study"]["amendment"]["changes_pass_rules"] = True
+    with pytest.raises(ConfigValidationError, match="P2-05C amendment metadata drifted"):
+        validate_preregistered_config(config)
+
+
+def test_validator_enforces_synthetic_constant_1x_pnl_model() -> None:
+    config = _mutable_config()
+    pnl = config["pnl_model"]
+
+    assert pnl["position_timing"] == "p is known at the bar open"
+    assert pnl["bar_multiplier_formula"] == (
+        "(1+p_prev*(open/prev_close-1))*(1-cost*abs(p-p_prev))*(1+p*(close/open-1))"
+    )
+    assert pnl["fold_start"] == {"starts_flat": True, "p_prev": 0}
+    assert pnl["terminal_liquidation"]["multiplier_formula"] == "1-cost*abs(p_final)"
+    assert pnl["reversal"]["absolute_position_change"] == 2
+    assert pnl["observed_and_permutation_use_identical_model"] is True
+
+    config["pnl_model"]["reversal"]["absolute_position_change"] = 1
+    with pytest.raises(ConfigValidationError, match="Synthetic constant-1x PnL model drifted"):
+        validate_preregistered_config(config)
+
+
 def test_validator_enforces_timeframe_applicability_and_walk_forward_names() -> None:
     config = _mutable_config()
     applicability = {hypothesis["id"]: hypothesis["applicability"] for hypothesis in config["hypotheses"]}
@@ -120,6 +160,7 @@ def test_validator_enforces_dsr_and_permutation_metadata() -> None:
     config = _mutable_config()
     dsr = config["multiple_testing"]["deflated_sharpe_ratio"]["formula_metadata"]
     permutation = config["multiple_testing"]["permutation_test"]
+    sharpe_handling = config["multiple_testing"]["sharpe_handling"]
     h3 = next(hypothesis for hypothesis in config["hypotheses"] if hypothesis["id"] == "H3")
 
     assert "per-bar nonannualized" in dsr["sharpe_definition"]
@@ -129,6 +170,38 @@ def test_validator_enforces_dsr_and_permutation_metadata() -> None:
     assert "sigma_SR" in dsr["cross_sectional_dispersion"]
     assert "T < 2" in dsr["failure_conditions"][2]
     assert permutation["seed_mode"] == "deterministic numpy SeedSequence seeded with 42"
+    assert sharpe_handling == {
+        "observed_undefined_or_zero_variance_result": "NaN",
+        "undefined_observed_candidate_can_pass": False,
+        "observed_candidate_value_is_not_imputed": True,
+        "family_only_undefined_trial_sharpe_fallback": {
+            "value": 0.0,
+            "scopes": ["dsr_family_sigma_sr", "permutation_family_max"],
+        },
+    }
+    assert permutation["q95"] == {
+        "quantile": 0.95,
+        "numpy_function": "numpy.quantile",
+        "method": "linear",
+        "formula": "numpy.quantile(null_max_sharpes, 0.95, method='linear')",
+    }
     assert permutation["empirical_p_formula"] == "(1 + count(null >= observed)) / 501"
     assert h3["signal_definition"]["sessions_utc"]["Asia"]["exit_open_hour"] == "08:00"
     assert h3["signal_definition"]["sessions_utc"]["USA"]["exit_open_hour"] == "21:00"
+
+
+def test_validator_rejects_sharpe_or_q95_clarification_drift() -> None:
+    config = _mutable_config()
+    fallback = config["multiple_testing"]["sharpe_handling"][
+        "family_only_undefined_trial_sharpe_fallback"
+    ]
+    fallback["value"] = 1.0
+
+    with pytest.raises(ConfigValidationError, match="Undefined-Sharpe handling drifted"):
+        validate_preregistered_config(config)
+
+    config = _mutable_config()
+    config["multiple_testing"]["permutation_test"]["q95"]["method"] = "nearest"
+
+    with pytest.raises(ConfigValidationError, match="Permutation-test rules drifted"):
+        validate_preregistered_config(config)

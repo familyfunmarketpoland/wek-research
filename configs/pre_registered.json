@@ -5,7 +5,19 @@
     "objective": "Evaluate six fixed crypto strategy families with frozen candidate grids under walk-forward optimization and a single locked holdout read.",
     "status": "pre_registered",
     "confirmatory": true,
-    "packet_reference": "P2-05-PREREG-CONFIG"
+    "packet_reference": "P2-05-PREREG-CONFIG",
+    "amendment": {
+      "amendment_id": "P2-05C",
+      "status": "clarification",
+      "recorded_before_first_h1_h6_outcome_calculation": true,
+      "outcomes_calculated_before_amendment": false,
+      "scope": "Clarifies PnL accounting, undefined Sharpe handling, and q95 interpolation.",
+      "changes_hypotheses": false,
+      "changes_candidate_grids": false,
+      "changes_candidate_count": false,
+      "changes_thresholds": false,
+      "changes_pass_rules": false
+    }
   },
   "universe": {
     "symbols": [
@@ -23,6 +35,32 @@
     "slippage_rate_per_side": 0.0005,
     "cost_rate_per_side": 0.0015,
     "cost_basis": "every entry and every exit"
+  },
+  "pnl_model": {
+    "name": "synthetic_constant_1x",
+    "capital_model": "synthetic constant-1x",
+    "position_values": [
+      -1,
+      0,
+      1
+    ],
+    "position_timing": "p is known at the bar open",
+    "cost_variable": "cost equals costs.cost_rate_per_side (0.0015)",
+    "bar_multiplier_formula": "(1+p_prev*(open/prev_close-1))*(1-cost*abs(p-p_prev))*(1+p*(close/open-1))",
+    "fold_start": {
+      "starts_flat": true,
+      "p_prev": 0
+    },
+    "terminal_liquidation": {
+      "enabled": true,
+      "timing": "after the final bar multiplier",
+      "multiplier_formula": "1-cost*abs(p_final)"
+    },
+    "reversal": {
+      "absolute_position_change": 2,
+      "cost_multiplier_formula": "1-cost*2"
+    },
+    "observed_and_permutation_use_identical_model": true
   },
   "rolling_windows": {
     "short_horizon_bars": {
@@ -54,6 +92,18 @@
   },
   "multiple_testing": {
     "candidate_count": 186,
+    "sharpe_handling": {
+      "observed_undefined_or_zero_variance_result": "NaN",
+      "undefined_observed_candidate_can_pass": false,
+      "observed_candidate_value_is_not_imputed": true,
+      "family_only_undefined_trial_sharpe_fallback": {
+        "value": 0.0,
+        "scopes": [
+          "dsr_family_sigma_sr",
+          "permutation_family_max"
+        ]
+      }
+    },
     "deflated_sharpe_ratio": {
       "enabled": true,
       "family_size_n": 186,
@@ -85,6 +135,12 @@
       "seed_mode": "deterministic numpy SeedSequence seeded with 42",
       "family_null": "maximum Sharpe across all 186 candidates",
       "null_summary": "best-of-all-candidates null Sharpe across the full frozen family for each permutation draw",
+      "q95": {
+        "quantile": 0.95,
+        "numpy_function": "numpy.quantile",
+        "method": "linear",
+        "formula": "numpy.quantile(null_max_sharpes, 0.95, method='linear')"
+      },
       "empirical_p_formula": "(1 + count(null >= observed)) / 501",
       "pass_rule": {
         "observed_sharpe_strictly_above_q95": true,
