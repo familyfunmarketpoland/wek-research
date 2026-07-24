@@ -72,6 +72,30 @@ results2/
 
 `report2.md` jest generowany z rzeczywistego uruchomienia badania, a nie składany ręcznie.
 
+## Forward Test
+
+Papierowy forward test zamrozonego kandydata jest odseparowany w
+[`forward_test/`](./forward_test/README.md). Ten tor ma osobna prerejestracje,
+osobny append-only ledger i statyczny dashboard publikowany na GitHub Pages.
+
+Najwazniejsze ograniczenia operacyjne:
+
+- runner to `python -m forward_test.runner`
+- harmonogram workflow to `17 */4 * * *` UTC oraz `workflow_dispatch`
+- workflow commituje tylko `forward_test/state.json`, `forward_test/ledger.jsonl`,
+  `forward_test/head.sha256` i `forward_test/dashboard/index.html`
+- nie wolno czytac ani listowac `data/holdout/` z poziomu runnera forward testu
+- nie ma live orderow ani sekretow exchange; tylko publiczne OHLCV i paper PnL
+- po `PASS`, `FAIL` lub `UNDERPOWERED` test pozostaje terminalny i nie jest
+  restartowany
+
+Przed pierwszym uruchomieniem trzeba wypchnac repo na GitHub, wlaczyc
+`Read and write permissions` w ustawieniach Actions oraz ustawic zrodlo Pages na
+`GitHub Actions`. Status sprawdzaj na opublikowanej stronie Pages i potwierdzaj
+kanonicznie w polu `status` pliku `forward_test/state.json` na zdalnym branchu.
+Pelna instrukcja uruchomienia i lista niezmiennych plikow znajduje sie w
+[`forward_test/README.md`](./forward_test/README.md).
+
 ## Testy
 
 ```bash

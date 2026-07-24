@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Forward Test Dashboard</title>
+  <style>
+    :root {
+      --bg: #f4f7f4;
+      --panel: #ffffff;
+      --ink: #12211d;
+      --muted: #54645f;
+      --line: #d5e1da;
+      --accent: #0f766e;
+      --accent-soft: #d9f4f0;
+      --warn: #a16207;
+      --warn-soft: #fff3c4;
+      --fail: #b42318;
+      --fail-soft: #fee4e2;
+      --pass: #067647;
+      --pass-soft: #d1fadf;
+      --run: #1d4ed8;
+      --run-soft: #dbeafe;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, #e6f4ea 0, transparent 26%),
+        linear-gradient(180deg, #f8faf8 0%, var(--bg) 100%);
+      color: var(--ink);
+      font: 16px/1.45 Menlo, Consolas, Monaco, monospace;
+    }
+    .page {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+    }
+    .hero {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 2.1fr 1fr;
+      align-items: start;
+      margin-bottom: 20px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 0 14px 30px rgba(18, 33, 29, 0.06);
+    }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 1.9rem; }
+    h2 { font-size: 1rem; margin-bottom: 12px; }
+    .muted { color: var(--muted); }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 0.88rem;
+      margin-bottom: 14px;
+      border: 1px solid transparent;
+    }
+    .status-pending { background: var(--accent-soft); color: var(--accent); border-color: #9ed8d0; }
+    .status-running { background: var(--run-soft); color: var(--run); border-color: #93c5fd; }
+    .status-pass { background: var(--pass-soft); color: var(--pass); border-color: #86efac; }
+    .status-fail { background: var(--fail-soft); color: var(--fail); border-color: #fda29b; }
+    .status-underpowered { background: var(--warn-soft); color: var(--warn); border-color: #facc15; }
+    .summary {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 20px 0;
+    }
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      background: #fbfdfb;
+    }
+    .kpi .label { color: var(--muted); font-size: 0.82rem; margin-bottom: 8px; }
+    .kpi .value { font-size: 1.35rem; }
+    .chart-wrap { margin-top: 8px; }
+    .legend { display: flex; gap: 18px; color: var(--muted); font-size: 0.86rem; margin-top: 10px; }
+    .legend span::before {
+      content: "";
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      margin-right: 8px;
+      vertical-align: -1px;
+    }
+    .legend .strategy::before { background: #0f766e; }
+    .legend .buyhold::before { background: #6aa7ff; }
+    .empty-chart {
+      min-height: 280px;
+      display: grid;
+      place-items: center;
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      color: var(--muted);
+      background: #fbfdfb;
+    }
+    .chart-bg { fill: #fbfdfb; stroke: #d5e1da; }
+    .axis-line { stroke: #d5e1da; stroke-width: 1; }
+    .axis-label { fill: #6b7c76; font-size: 11px; }
+    .lower {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 1.35fr 1fr;
+      margin-top: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    th, td {
+      padding: 9px 8px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    .audit th {
+      width: 42%;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .footer-note {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+    @media (max-width: 960px) {
+      .hero, .lower, .summary { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <article class="panel">
+        <div class="status-pill status-running">RUNNING</div>
+        <h1>h2_solusdt_4h_short_hold20_forward_2026</h1>
+        <p class="muted">Confirm the frozen H1-H6 candidate on observations that did not exist at preregistration time.</p>
+        <div class="summary">
+          <div class="kpi">
+            <div class="label">Closed trades</div>
+            <div class="value">0/30</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Strategy equity</div>
+            <div class="value">1.0000</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Net return</div>
+            <div class="value">+0.00%</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Buy and hold</div>
+            <div class="value">+0.00%</div>
+          </div>
+        </div>
+        <div class="chart-wrap"><div class="empty-chart">Brak punktow equity. Dashboard czeka na pierwszy zapis runnera.</div></div>
+        <div class="legend">
+          <span class="strategy">Frozen candidate</span>
+          <span class="buyhold">SOL/USDT buy-and-hold</span>
+        </div>
+      </article>
+      <aside class="panel">
+        <h2>Runtime snapshot</h2>
+        <table>
+          <tr><th>Status</th><td>RUNNING</td></tr>
+          <tr><th>Max drawdown</th><td>+0.00%</td></tr>
+          <tr><th>Per-trade Sharpe</th><td>NA</td></tr>
+          <tr><th>Open position</th><td>0</td></tr>
+          <tr><th>Latest signal</th><td>NA</td></tr>
+          <tr><th>First eligible candle</th><td>2026-07-25T00:00:00Z</td></tr>
+          <tr><th>Underpowered deadline</th><td>2027-07-25T00:00:00Z</td></tr>
+          <tr><th>Last processed open</th><td>NA</td></tr>
+          <tr><th>Pass rule</th><td>closed_trades == 30 AND net_return &gt; 0 AND per_trade_sharpe &gt; 0</td></tr>
+          <tr><th>Early kill</th><td>drawdown strictly greater than 25 percent triggers FAIL</td></tr>
+        </table>
+        <p class="footer-note">No live orders. Public Binance OHLCV only. Files are append-only from the workflow point of view.</p>
+      </aside>
+    </section>
+
+    <section class="lower">
+      <article class="panel">
+        <h2>All closed trades</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Entry</th>
+              <th>Exit</th>
+              <th>Side</th>
+              <th>Bars</th>
+              <th>Return</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="6" class="muted">Brak zamknietych transakcji.</td></tr>
+          </tbody>
+        </table>
+      </article>
+      <article class="panel">
+        <h2>Hashes and audit</h2>
+        <table class="audit">
+          <tbody>
+            <tr><th>Study ID</th><td>h2_solusdt_4h_short_hold20_forward_2026</td></tr><tr><th>Terminal status</th><td>RUNNING</td></tr><tr><th>Eligible from</th><td>2026-07-25T00:00:00Z</td></tr><tr><th>Underpowered deadline</th><td>2027-07-25T00:00:00Z</td></tr><tr><th>Target closed trades</th><td>30</td></tr><tr><th>Candidate ID</th><td>H2|solusdt|4h|side-short|hold_bars-20</td></tr><tr><th>Parameter SHA256</th><td>a81471a4f44ed58246ef63bb4de420505aac8d725402bdcef9954e04497eac78</td></tr><tr><th>Config fingerprint</th><td>7e77ff5103e7b8e82a2d3ae3d16db0afebc9cfa3c105985ddf3fe35b1fd84990</td></tr><tr><th>Prereg SHA256</th><td>0e83bddc6fea02ef19fdca69a0face24358da57a8901ca4d8849c0eca9b97c2b</td></tr><tr><th>State SHA256</th><td>bd6f823c0dc56aaa27f03e16a535c3a5ce0f8fcfb844ad0fba7d7c1c469b1446</td></tr><tr><th>Canonical state SHA256</th><td>1b9e4e19dccc19e274e3105d155a424aa351eb52d4a06ec93fef8120a23b956c</td></tr><tr><th>State checkpoint SHA256</th><td>7f3b61e0682dc9362d169facbd41c08696d64f70dfbf96ac601ef797fd1a3bcd</td></tr><tr><th>Ledger SHA256</th><td>e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</td></tr><tr><th>Head SHA256</th><td>0000000000000000000000000000000000000000000000000000000000000000</td></tr><tr><th>Latest ledger event SHA256</th><td>NA</td></tr><tr><th>Last eligible candle</th><td>NA</td></tr><tr><th>Runner updated at</th><td>2026-07-24T12:15:17Z</td></tr><tr><th>Dashboard rendered at</th><td>2026-07-24T20:54:10Z</td></tr><tr><th>Workflow schedule</th><td>17 */4 * * *</td></tr>
+          </tbody>
+        </table>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

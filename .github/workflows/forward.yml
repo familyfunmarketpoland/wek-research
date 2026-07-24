@@ -1,0 +1,192 @@
+name: Forward Test
+
+on:
+  schedule:
+    - cron: "17 */4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: forward-test
+  cancel-in-progress: false
+
+jobs:
+  trade:
+    if: github.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      base_head: ${{ steps.preflight.outputs.base_head }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Record base head and verify clean checkout
+        id: preflight
+        run: |
+          set -euo pipefail
+          git diff --quiet
+          git diff --cached --quiet
+          base_head="$(git rev-parse HEAD)"
+          echo "base_head=${base_head}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies without write credentials
+        run: |
+          set -euo pipefail
+          test -z "${GH_TOKEN:-}"
+          test -z "${GITHUB_TOKEN:-}"
+          if git config --local --get-regexp '^http\..*\.extraheader$' >/dev/null; then
+            echo "Checkout credentials persisted unexpectedly" >&2
+            exit 1
+          fi
+          python -m pip install -r requirements.txt
+
+      - name: Run frozen forward-test runner
+        run: |
+          set -euo pipefail
+          test -z "${GH_TOKEN:-}"
+          test -z "${GITHUB_TOKEN:-}"
+          if git config --local --get-regexp '^http\..*\.extraheader$' >/dev/null; then
+            echo "Checkout credentials persisted unexpectedly" >&2
+            exit 1
+          fi
+          python -m forward_test.runner
+
+      - name: Render static dashboard
+        run: python -m forward_test.dashboard
+
+      - name: Package allowlisted state artifacts
+        id: state_artifact
+        run: |
+          set -euo pipefail
+          artifact_dir="$(mktemp -d "${RUNNER_TEMP}/forward-state.XXXXXX")"
+          mkdir -p "${artifact_dir}/forward_test/dashboard"
+          for source in \
+            forward_test/state.json \
+            forward_test/ledger.jsonl \
+            forward_test/head.sha256 \
+            forward_test/dashboard/index.html; do
+            test -f "${source}"
+            test ! -L "${source}"
+          done
+          /bin/cp -- forward_test/state.json "${artifact_dir}/forward_test/state.json"
+          /bin/cp -- forward_test/ledger.jsonl "${artifact_dir}/forward_test/ledger.jsonl"
+          /bin/cp -- forward_test/head.sha256 "${artifact_dir}/forward_test/head.sha256"
+          /bin/cp -- forward_test/dashboard/index.html "${artifact_dir}/forward_test/dashboard/index.html"
+          echo "path=${artifact_dir}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload state artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: forward-state
+          path: ${{ steps.state_artifact.outputs.path }}
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+        with:
+          path: ${{ steps.state_artifact.outputs.path }}/forward_test/dashboard
+
+  commit:
+    needs: trade
+    if: github.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - name: Checkout immutable base
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ needs.trade.outputs.base_head }}
+
+      - name: Download state artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: forward-state
+          path: ${{ runner.temp }}/forward-state
+
+      - name: Validate and apply allowlisted state artifacts
+        env:
+          BASE_HEAD: ${{ needs.trade.outputs.base_head }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${BASE_HEAD}"
+          artifact_dir="${RUNNER_TEMP}/forward-state"
+          if find "${artifact_dir}" -type l -print -quit | grep -q .; then
+            echo "State artifact contains a symbolic link" >&2
+            exit 1
+          fi
+          expected="$(printf '%s\n' \
+            forward_test/dashboard/index.html \
+            forward_test/head.sha256 \
+            forward_test/ledger.jsonl \
+            forward_test/state.json)"
+          actual="$(cd "${artifact_dir}" && find . -type f -print | sed 's#^\./##' | sort)"
+          test "${actual}" = "${expected}"
+          test ! -L forward_test
+          test ! -L forward_test/dashboard
+          for destination in \
+            forward_test/state.json \
+            forward_test/ledger.jsonl \
+            forward_test/head.sha256 \
+            forward_test/dashboard/index.html; do
+            test ! -L "${destination}"
+            /bin/cp -- "${artifact_dir}/${destination}" "${destination}"
+          done
+
+      - name: Commit allowlisted state artifacts
+        id: commit
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+          BASE_HEAD: ${{ needs.trade.outputs.base_head }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          auth_header="$(printf 'x-access-token:%s' "${GH_TOKEN}" | base64 | tr -d '\n')"
+          git -c http.https://github.com/.extraheader="AUTHORIZATION: basic ${auth_header}" fetch --no-tags origin "refs/heads/${BRANCH_NAME}"
+          remote_head_after="$(git rev-parse FETCH_HEAD)"
+          test "${BASE_HEAD}" = "${remote_head_after}"
+          git add -- forward_test/state.json forward_test/ledger.jsonl forward_test/head.sha256 forward_test/dashboard/index.html
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "forward: update frozen paper state"
+          git -c http.https://github.com/.extraheader="AUTHORIZATION: basic ${auth_header}" push origin "HEAD:refs/heads/${BRANCH_NAME}"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: commit
+    if: github.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
+
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
