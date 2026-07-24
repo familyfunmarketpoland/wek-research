@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "study": {
+    "id": "h2_solusdt_4h_short_hold20_forward_2026",
+    "purpose": "Confirm the frozen H1-H6 candidate on observations that did not exist at preregistration time.",
+    "status": "PRE_REGISTERED_NOT_STARTED",
+    "registered_at_utc": "2026-07-24T12:15:17Z",
+    "first_eligible_candle_open_utc": "2026-07-25T00:00:00Z",
+    "underpowered_deadline_utc": "2027-07-25T00:00:00Z",
+    "evaluation_data_rule": "Only candles with open timestamp at or after first_eligible_candle_open_utc affect paper PnL, trades, drawdown, or verdict. Earlier candles are indicator warm-up only.",
+    "source_config_commit": "96bebdf",
+    "source_research_implementation_commit": "91c72b0",
+    "source_config_fingerprint": "7e77ff5103e7b8e82a2d3ae3d16db0afebc9cfa3c105985ddf3fe35b1fd84990"
+  },
+  "frozen_candidate": {
+    "candidate_id": "H2|solusdt|4h|side-short|hold_bars-20",
+    "parameter_hash_algorithm": "sha256(canonical JSON of strategy_parameters; UTF-8; sort_keys=true; separators=(',', ':'); ensure_ascii=true)",
+    "parameter_sha256": "a81471a4f44ed58246ef63bb4de420505aac8d725402bdcef9954e04497eac78",
+    "strategy_parameters": {
+      "candidate_id": "H2|solusdt|4h|side-short|hold_bars-20",
+      "hypothesis_id": "H2",
+      "symbol": "SOL/USDT",
+      "timeframe": "4h",
+      "timeframe_hours": 4,
+      "position_model": "synthetic_constant_1x",
+      "side": "short",
+      "target_position": -1,
+      "allow_reversal": false,
+      "entry": {
+        "signal_stamp": "closed_candle",
+        "execution": "next_candle_open",
+        "boolean_rule": "breakout_short AND volatility_compression",
+        "breakout_short": {
+          "operator": "close_strictly_less_than_prior_donchian_low",
+          "donchian_window_bars": 20,
+          "current_bar_excluded_from_channel": true
+        },
+        "volatility_compression": {
+          "return_definition": "log(close / close.shift(1))",
+          "realized_vol_window_bars": 20,
+          "realized_vol_std_ddof": 0,
+          "history_window_bars": 2190,
+          "history_quantile_numerator": 1,
+          "history_quantile_denominator": 3,
+          "history_baseline_excludes_current_rv": true,
+          "operator": "current_rv20_strictly_less_than_prior_history_lower_tercile"
+        }
+      },
+      "exit": {
+        "execution": "next_candle_open",
+        "opposite_channel": {
+          "operator": "close_strictly_greater_than_prior_donchian_high",
+          "donchian_window_bars": 20,
+          "current_bar_excluded_from_channel": true
+        },
+        "maximum_hold_bars": 20,
+        "hold_counting": "entry_fill_bar_is_bar_1; exit is scheduled after the 20th held bar closes",
+        "simultaneous_exit_reason_priority": "hold_expiry_over_opposite_channel"
+      },
+      "costs": {
+        "fee_rate_per_side": 0.001,
+        "slippage_rate_per_side": 0.0005,
+        "total_rate_per_side": 0.0015,
+        "transition_cost_rule": "multiply equity at open by 1 - total_rate_per_side * abs(target_position - previous_position)"
+      },
+      "pnl": {
+        "bar_multiplier": "(1 + p_prev * (open / prev_close - 1)) * (1 - cost * abs(p - p_prev)) * (1 + p * (close / open - 1))",
+        "same_close_reentry_after_open_exit": true,
+        "funding_borrow_taxes_market_impact": "excluded"
+      },
+      "warmup_bars_before_first_eligible_candle": 2210
+    }
+  },
+  "evaluation": {
+    "initial_equity": 1.0,
+    "closed_trades_target": 30,
+    "evaluate_immediately_after_target_trade_closes": true,
+    "net_return_definition": "current paper equity / initial equity - 1 after all costs",
+    "per_trade_return_definition": "exit equity after exit cost / entry equity before entry cost - 1",
+    "per_trade_sharpe_definition": "arithmetic mean of the first 30 closed-trade net returns divided by their sample standard deviation with ddof=1; zero or non-finite standard deviation fails",
+    "pass_rule": "closed_trades == 30 AND net_return > 0 AND per_trade_sharpe > 0",
+    "fail_rule_at_30_trades": "closed_trades == 30 AND NOT(net_return > 0 AND per_trade_sharpe > 0)",
+    "early_kill_rule": {
+      "metric": "positive drawdown magnitude = 1 - close-marked paper equity / running close-marked high-watermark",
+      "high_watermark_seed": "running close-marked high-watermark is initialized to initial_equity 1.0 before the first eligible candle opens and then updated after each close-marked equity observation",
+      "threshold": 0.25,
+      "comparison": "drawdown strictly greater than 25 percent triggers FAIL",
+      "priority": "evaluated before the 30-trade and 12-month rules",
+      "terminal_open_position_policy": "record the marked open position in the terminal snapshot; do not invent a non-preregistered fill"
+    },
+    "underpowered_rule": {
+      "deadline_utc": "2027-07-25T00:00:00Z",
+      "condition": "fewer than 30 normally closed trades when the deadline is reached",
+      "deadline_ordering": "at the deadline open, first execute an order that was already scheduled by the prior eligible candle; then evaluate trade count and verdict; do not process the close or create signals for a candle opening at or after the deadline",
+      "verdict": "UNDERPOWERED",
+      "terminal_open_position_policy": "record the marked open position in the terminal snapshot; do not count an administrative close as a qualifying trade"
+    },
+    "terminal_statuses": [
+      "PASS",
+      "FAIL",
+      "UNDERPOWERED"
+    ],
+    "binary_result_scope": "A powered test reaching 30 normally closed trades has exactly PASS or FAIL. UNDERPOWERED is a distinct preregistered non-evidentiary terminal status, never an almost-pass.",
+    "no_almost_category": true,
+    "no_parameter_changes": true,
+    "no_restart_after_terminal_status": true
+  },
+  "background_benchmark": {
+    "name": "SOL/USDT buy-and-hold",
+    "entry_timestamp": "2026-07-25T00:00:00Z",
+    "entry_price": "open of the first eligible candle",
+    "entry_cost_rate": 0.0015,
+    "position": 1,
+    "exit_cost_during_running_test": 0.0,
+    "affects_candidate_verdict": false
+  },
+  "operations": {
+    "expected_schedule": "17 minutes after every UTC 4-hour boundary",
+    "github_actions_cron": "17 */4 * * *",
+    "state_file": "forward_test/state.json",
+    "append_only_ledger_file": "forward_test/ledger.jsonl",
+    "ledger_head_file": "forward_test/head.sha256",
+    "dashboard_file": "forward_test/dashboard/index.html",
+    "data_source": "Binance public OHLCV through ccxt; no API keys and no live orders",
+    "idempotency": "each eligible closed candle is processed at most once; repeated runs do not duplicate decisions, orders, equity points, or trades",
+    "historical_revision_policy": "previously ledgered eligible OHLCV hashes are immutable; a changed historical row causes a hard failure before state mutation",
+    "workflow_concurrency": "one non-cancelling run at a time; non-fast-forward pushes fail rather than merge or force-push state"
+  },
+  "prohibited_actions": [
+    "changing strategy_parameters or parameter_sha256",
+    "changing evaluation thresholds or terminal rules after this preregistration commit",
+    "processing a candle opened before 2026-07-25T00:00:00Z as an evaluation observation",
+    "manual edits, deletion, reordering, or truncation of state.json, ledger.jsonl, or head.sha256",
+    "reading or listing data/holdout from the forward-test runner or workflow",
+    "placing live orders or using exchange API credentials",
+    "force-pushing or silently resolving a state commit race",
+    "restarting the test after PASS, FAIL, or UNDERPOWERED"
+  ]
+}
