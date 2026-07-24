@@ -14,6 +14,7 @@ import hashlib
 import json
 import os
 import re
+import stat
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -291,28 +292,27 @@ def load_holdout_once(
     frozen_candidate_hash: str,
     data_dir: str | Path = DATA_DIR,
     manifest_path: str | Path | None = None,
-    candidate: bytes | str | Path | Mapping[str, Any] | None = None,
+    candidate: Mapping[str, Any],
 ) -> pd.DataFrame:
     """Burn a one-time final-access claim, then load exactly one holdout dataset.
 
-    ``frozen_candidate_hash`` must be the SHA256 of the already-frozen candidate
-    artifact. If ``candidate`` is supplied, it is hashed and must match the
-    provided hash before the claim is burned.
+    ``frozen_candidate_hash`` must be the SHA256 of the already-frozen mapping.
+    The mapping is mandatory and must bind the requested dataset and active
+    manifest fingerprint before the claim is burned.
     """
 
     _validate_sha256(frozen_candidate_hash, label="frozen_candidate_hash")
-    if candidate is not None:
-        actual_candidate_hash = build_candidate_hash(candidate)
-        if actual_candidate_hash != frozen_candidate_hash:
-            raise FinalAccessError("frozen_candidate_hash does not match candidate")
+    if not isinstance(candidate, Mapping):
+        raise FinalAccessError("candidate must be a frozen mapping with dataset and manifest bindings")
+    actual_candidate_hash = build_candidate_hash(candidate)
+    if actual_candidate_hash != frozen_candidate_hash:
+        raise FinalAccessError("frozen_candidate_hash does not match candidate")
 
     dataset = _dataset_from_symbol_timeframe(symbol, timeframe)
-    if isinstance(candidate, Mapping):
-        _validate_candidate_dataset_binding(candidate, dataset=dataset, symbol=symbol, timeframe=timeframe)
+    _validate_candidate_dataset_binding(candidate, dataset=dataset, symbol=symbol, timeframe=timeframe)
     manifest = load_manifest(data_dir=data_dir, manifest_path=manifest_path)
     fingerprint = manifest_fingerprint(manifest)
-    if isinstance(candidate, Mapping):
-        _validate_candidate_manifest_binding(candidate, fingerprint=fingerprint)
+    _validate_candidate_manifest_binding(candidate, fingerprint=fingerprint)
     entry = _entry_for_dataset(manifest, dataset)
     claim_path = _burn_final_claim(
         manifest.data_dir,
@@ -428,9 +428,41 @@ def _burn_final_claim(
     frozen_candidate_hash: str,
     manifest_fingerprint: str,
 ) -> Path:
-    claims_dir = data_dir / HOLDOUT_DIRNAME / CLAIMS_DIRNAME
-    claims_dir.mkdir(parents=True, exist_ok=True)
-    claims_dir = claims_dir.resolve(strict=True)
+    holdout_dir = data_dir / HOLDOUT_DIRNAME
+    if holdout_dir.is_symlink():
+        raise FinalAccessError(f"holdout directory must not be a symlink: {holdout_dir}")
+    try:
+        canonical_holdout = holdout_dir.resolve(strict=True)
+    except FileNotFoundError as exc:
+        raise FinalAccessError(f"holdout directory does not exist: {holdout_dir}") from exc
+    if canonical_holdout.parent != data_dir or not canonical_holdout.is_dir():
+        raise FinalAccessError(f"holdout directory is not the canonical data/holdout directory: {canonical_holdout}")
+
+    claims_dir = canonical_holdout / CLAIMS_DIRNAME
+    try:
+        claims_dir.mkdir(mode=0o700)
+    except FileExistsError:
+        pass
+    if claims_dir.is_symlink():
+        raise FinalAccessError(f"claims directory must not be a symlink: {claims_dir}")
+    try:
+        claims_stat = claims_dir.lstat()
+        canonical_claims = claims_dir.resolve(strict=True)
+    except FileNotFoundError as exc:
+        raise FinalAccessError(f"claims directory disappeared before claim creation: {claims_dir}") from exc
+    if not stat.S_ISDIR(claims_stat.st_mode) or canonical_claims.parent != canonical_holdout:
+        raise FinalAccessError(f"claims directory is not canonical: {claims_dir}")
+
+    directory_flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        claims_fd = os.open(claims_dir, directory_flags)
+    except OSError as exc:
+        raise FinalAccessError(f"cannot securely open claims directory: {claims_dir}") from exc
+    opened_stat = os.fstat(claims_fd)
+    if (opened_stat.st_dev, opened_stat.st_ino) != (claims_stat.st_dev, claims_stat.st_ino):
+        os.close(claims_fd)
+        raise FinalAccessError("claims directory identity changed before claim creation")
+
     claim_path = claims_dir / FINAL_CLAIM_FILENAME
     payload = json.dumps(
         {
@@ -442,18 +474,22 @@ def _burn_final_claim(
         sort_keys=True,
         indent=2,
     )
+    claim_flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY | getattr(os, "O_NOFOLLOW", 0)
     try:
-        fd = os.open(claim_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
-    except FileExistsError as exc:
-        raise FinalAccessError(
-            "final holdout access already claimed for this study"
-        ) from exc
-    with os.fdopen(fd, "w", encoding="utf-8") as handle:
-        handle.write(payload)
-        handle.write("\n")
-        handle.flush()
-        os.fsync(handle.fileno())
-    os.chmod(claim_path, 0o400)
+        try:
+            fd = os.open(FINAL_CLAIM_FILENAME, claim_flags, 0o400, dir_fd=claims_fd)
+        except FileExistsError as exc:
+            raise FinalAccessError(
+                "final holdout access already claimed for this study"
+            ) from exc
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(payload)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.fsync(claims_fd)
+    finally:
+        os.close(claims_fd)
     return claim_path
 
 
@@ -658,7 +694,9 @@ def _validate_candidate_manifest_binding(candidate: Mapping[str, Any], *, finger
     candidate_fingerprint = candidate.get("manifest_fingerprint")
     if candidate_fingerprint is None:
         candidate_fingerprint = candidate.get("manifest_sha256")
-    if candidate_fingerprint is not None and candidate_fingerprint != fingerprint:
+    if candidate_fingerprint is None:
+        raise FinalAccessError("candidate must include the active manifest fingerprint")
+    if candidate_fingerprint != fingerprint:
         raise FinalAccessError("candidate manifest fingerprint does not match active holdout manifest")
 
 

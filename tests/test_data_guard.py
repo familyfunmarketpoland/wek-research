@@ -150,15 +150,30 @@ def test_research_loader_rejects_rows_after_cutoff_and_hash_mismatch(tmp_path: P
 
 def test_final_loader_requires_candidate_hash_and_burns_once_before_read(tmp_path: Path) -> None:
     data_dir = _split_tmp_dataset(tmp_path)
-    candidate = {"dataset": "btc_usdt_1d", "params": {"length": 14}}
+    active_manifest_fingerprint = manifest_fingerprint(data_dir / "holdout_manifest.json")
+    candidate = {
+        "dataset": "btc_usdt_1d",
+        "params": {"length": 14},
+        "manifest_fingerprint": active_manifest_fingerprint,
+    }
     candidate_hash = build_candidate_hash(candidate)
     unbound_candidate = {"params": {"length": 14}}
     unbound_hash = build_candidate_hash(unbound_candidate)
-    mismatched_candidate = {"dataset": "eth_usdt_1d", "params": {"length": 14}}
+    mismatched_candidate = {
+        "dataset": "eth_usdt_1d",
+        "params": {"length": 14},
+        "manifest_fingerprint": active_manifest_fingerprint,
+    }
     mismatched_hash = build_candidate_hash(mismatched_candidate)
 
     with pytest.raises(FinalAccessError, match="must be a lowercase"):
-        load_holdout_once("BTC/USDT", "1d", data_dir=data_dir, frozen_candidate_hash="bad")
+        load_holdout_once(
+            "BTC/USDT",
+            "1d",
+            data_dir=data_dir,
+            frozen_candidate_hash="bad",
+            candidate=candidate,
+        )
     with pytest.raises(FinalAccessError, match="does not match"):
         load_holdout_once(
             "BTC/USDT",
@@ -198,7 +213,7 @@ def test_final_loader_requires_candidate_hash_and_burns_once_before_read(tmp_pat
     claim_payload = json.loads(claim.read_text(encoding="utf-8"))
     assert claim_payload["dataset"] == "btc_usdt_1d"
     assert claim_payload["frozen_candidate_hash"] == candidate_hash
-    assert claim_payload["manifest_fingerprint"] == manifest_fingerprint(data_dir / "holdout_manifest.json")
+    assert claim_payload["manifest_fingerprint"] == active_manifest_fingerprint
     with pytest.raises(FinalAccessError, match="already claimed"):
         load_holdout_once(
             "BTC/USDT",
@@ -217,7 +232,11 @@ def test_final_loader_global_claim_blocks_different_dataset_and_hash(tmp_path: P
         "params": {"length": 14},
         "manifest_fingerprint": manifest_fingerprint(data_dir / "holdout_manifest.json"),
     }
-    second_candidate = {"dataset": "eth_usdt_1d", "params": {"length": 20}}
+    second_candidate = {
+        "dataset": "eth_usdt_1d",
+        "params": {"length": 20},
+        "manifest_fingerprint": manifest_fingerprint(data_dir / "holdout_manifest.json"),
+    }
     first_hash = build_candidate_hash(first_candidate)
     second_hash = build_candidate_hash(second_candidate)
 
@@ -240,3 +259,53 @@ def test_final_loader_global_claim_blocks_different_dataset_and_hash(tmp_path: P
         )
     claims = list((data_dir / "holdout" / ".claims").glob("*.claimed"))
     assert [claim.name for claim in claims] == [FINAL_CLAIM_FILENAME]
+
+
+def test_final_loader_rejects_non_mapping_candidate_before_claim(tmp_path: Path) -> None:
+    data_dir = _split_tmp_dataset(tmp_path)
+    candidate = "unbound-candidate"
+
+    with pytest.raises(FinalAccessError, match="frozen mapping"):
+        load_holdout_once(
+            "BTC/USDT",
+            "1d",
+            data_dir=data_dir,
+            frozen_candidate_hash=build_candidate_hash(candidate),
+            candidate=candidate,  # type: ignore[arg-type]
+        )
+
+    assert not (data_dir / "holdout" / ".claims" / FINAL_CLAIM_FILENAME).exists()
+
+    missing_manifest_candidate = {"dataset": "btc_usdt_1d"}
+    with pytest.raises(FinalAccessError, match="manifest fingerprint"):
+        load_holdout_once(
+            "BTC/USDT",
+            "1d",
+            data_dir=data_dir,
+            frozen_candidate_hash=build_candidate_hash(missing_manifest_candidate),
+            candidate=missing_manifest_candidate,
+        )
+
+    assert not (data_dir / "holdout" / ".claims" / FINAL_CLAIM_FILENAME).exists()
+
+
+def test_final_loader_rejects_symlinked_claim_directory(tmp_path: Path) -> None:
+    data_dir = _split_tmp_dataset(tmp_path)
+    candidate = {
+        "dataset": "btc_usdt_1d",
+        "manifest_fingerprint": manifest_fingerprint(data_dir / "holdout_manifest.json"),
+    }
+    outside_claims = tmp_path / "outside-claims"
+    outside_claims.mkdir()
+    (data_dir / "holdout" / ".claims").symlink_to(outside_claims, target_is_directory=True)
+
+    with pytest.raises(FinalAccessError, match="must not be a symlink"):
+        load_holdout_once(
+            "BTC/USDT",
+            "1d",
+            data_dir=data_dir,
+            frozen_candidate_hash=build_candidate_hash(candidate),
+            candidate=candidate,
+        )
+
+    assert not (outside_claims / FINAL_CLAIM_FILENAME).exists()
