@@ -117,6 +117,10 @@ def test_research_phase_no_edge_writes_artifacts_and_never_uses_holdout(tmp_path
     assert "## Zamrozone uzasadnienia ekonomiczne" in report
     assert "H2 — Realized-Volatility Compression Donchian Breakout" in report
     assert "annualized benchmark Sharpe" in report
+    assert "## Wnioski z fazy research" in report
+    assert "Pelny zestaw regul przeszedl: `0/186`" in report
+    assert "mieszanie czestotliwosci" in report
+    assert "przesuniec cyklicznych sygnalu" in report
     assert "bez adaptacyjnego wyboru parametrow" in report
     assert "observed Sharpe > q95" in report
     assert "- positive_net_oos_return" in report

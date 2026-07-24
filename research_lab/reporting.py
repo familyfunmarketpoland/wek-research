@@ -74,6 +74,9 @@ def write_report(
                 f"eligible={eligible_count}, passing={passing_count}, najblizszy=`{nearest}`."
             )
     lines.append("")
+    lines.append("## Wnioski z fazy research")
+    lines.extend(_research_conclusions(candidates, decision))
+    lines.append("")
     lines.append("## Najblizszy kandydat i powody porazki")
     nearest = decision.get("nearest_candidate") or {}
     if nearest:
@@ -99,7 +102,12 @@ def write_report(
     lines.append(
         "DSR liczony jest dla calej rodziny 186 kandydatow; niezdefiniowane Sharpe w rodzinie "
         "sa mapowane na 0 tylko na potrzeby korekty rodzinnej. Test permutacyjny raportuje "
-        "najlepszy Sharpe rodziny dla kazdej z 500 permutacji."
+        "najlepszy Sharpe rodziny dla kazdej z 500 niezaleznych przesuniec cyklicznych sygnalu w obrebie foldow."
+    )
+    lines.append(
+        "Zamrozona miara selekcyjna DSR/permutacji to nieannualizowany Sharpe per-bar wspolny dla 1h i 4h. "
+        "Annualizowane Sharpe w tabeli sa opisowe i nie uczestnicza w selekcji; mieszanie czestotliwosci "
+        "w jednej rodzinie jest ograniczeniem interpretacyjnym prerejestracji."
     )
     lines.append(
         "Regula przejscia: net OOS return > 0, transakcje OOS >= 30, przewaga nad cost-matched buy-and-hold "
@@ -141,15 +149,63 @@ def _power_warnings(candidates: pd.DataFrame) -> list[str]:
     warnings: list[str] = []
     if "trades" in candidates:
         eligible = int((pd.to_numeric(candidates["trades"], errors="coerce") >= 30).sum())
+        underpowered = int(len(candidates) - eligible)
         if eligible == 0:
             warnings.append("Zaden kandydat nie osiagnal progu 30 transakcji OOS; moc testu jest ograniczona.")
         elif eligible < max(5, int(0.05 * len(candidates))):
             warnings.append("Bardzo malo kandydatow osiagnelo prog 30 transakcji OOS; interpretacja mocy wymaga ostroznosci.")
+        elif underpowered:
+            warnings.append(
+                f"{underpowered}/{len(candidates)} kandydatow nie osiagnelo progu 30 transakcji OOS i zostalo automatycznie odrzuconych."
+            )
     if "fold_count" in candidates:
         folds = pd.to_numeric(candidates["fold_count"], errors="coerce")
         if folds.notna().any() and int((folds <= 1).sum()) > 0:
             warnings.append("Czesc kandydatow ma jeden lub zero kompletnych foldow OOS.")
     return warnings
+
+
+def _research_conclusions(candidates: pd.DataFrame, decision: Mapping[str, Any]) -> list[str]:
+    if candidates.empty:
+        return ["Brak kandydatow do interpretacji."]
+
+    total = len(candidates)
+    positive = _true_count(candidates, "positive_net_oos_return")
+    eligible = _true_count(candidates, "minimum_oos_trades")
+    dsr_pass = _true_count(candidates, "dsr_pass")
+    permutation_pass = int(
+        (_truth_series(candidates, "permutation_q95_pass") & _truth_series(candidates, "permutation_p_pass")).sum()
+    )
+    all_pass = _true_count(candidates, "passes_all")
+    lines = [
+        f"- Pelny zestaw regul przeszedl: `{all_pass}/{total}` kandydatow.",
+        f"- Dodatni zwrot netto OOS mialo `{positive}/{total}`; prog mocy >=30 transakcji spelnilo `{eligible}/{total}`.",
+        f"- DSR > 0.95 spelnilo `{dsr_pass}/{total}`; oba warunki familywise permutation spelnilo `{permutation_pass}/{total}`.",
+    ]
+    nearest = decision.get("nearest_candidate") or {}
+    if nearest:
+        lines.append(
+            "- Wedlug zamrozonego rankingu DSR najblizej byl "
+            f"`{nearest.get('candidate_id')}`: OOS return={_fmt(nearest.get('total_return'))}, "
+            f"annualized Sharpe={_fmt(nearest.get('Sharpe'))}, DSR={_fmt(nearest.get('dsr'))}, "
+            f"familywise p={_fmt(nearest.get('permutation_empirical_p'))}, trades={_fmt(nearest.get('trades'))}."
+        )
+    if decision.get("decision") != "WINNER_FROZEN":
+        lines.append("- Werdykt konfirmacyjny: NO_EDGE; siatki nie sa rozszerzane, a holdout pozostaje nieodczytany.")
+    return lines
+
+
+def _true_count(frame: pd.DataFrame, column: str) -> int:
+    return int(_truth_series(frame, column).sum())
+
+
+def _truth_series(frame: pd.DataFrame, column: str) -> pd.Series:
+    if column not in frame:
+        return pd.Series(False, index=frame.index, dtype=bool)
+    values = frame[column]
+    if values.dtype == bool:
+        return values.fillna(False)
+    return values.astype(str).str.lower().eq("true")
 
 
 def _hypothesis_table(candidates: pd.DataFrame) -> list[str]:
