@@ -1,0 +1,410 @@
+{
+  "study": {
+    "study_id": "confirmatory_h1_h6",
+    "title": "Pre-Registered Confirmatory Study for Hypotheses H1-H6",
+    "objective": "Evaluate six fixed crypto strategy families with frozen candidate grids under walk-forward optimization and a single locked holdout read.",
+    "status": "pre_registered",
+    "confirmatory": true,
+    "packet_reference": "P2-05-PREREG-CONFIG"
+  },
+  "universe": {
+    "symbols": [
+      "BTC/USDT",
+      "ETH/USDT",
+      "SOL/USDT"
+    ],
+    "timeframes": [
+      "1h",
+      "4h"
+    ]
+  },
+  "costs": {
+    "fee_rate_per_side": 0.001,
+    "slippage_rate_per_side": 0.0005,
+    "cost_rate_per_side": 0.0015,
+    "cost_basis": "every entry and every exit"
+  },
+  "rolling_windows": {
+    "short_horizon_bars": {
+      "volume_sma": 20,
+      "return_zscore": 20,
+      "donchian_breakout": 20,
+      "relative_volume": 20,
+      "volume_entropy": 20,
+      "nr7": 7
+    },
+    "rolling_year_bars": {
+      "1h": 8760,
+      "4h": 2190
+    },
+    "causal_baselines_exclude_current_bar": true
+  },
+  "walk_forward": {
+    "train_months": 12,
+    "oos_months": 3,
+    "step_months": 3,
+    "require_complete_folds": true,
+    "scoring_scope": "stitched_oos",
+    "adaptive_parameter_selection": false,
+    "candidate_policy": "each pre-registered fixed candidate is scored on stitched out-of-sample results only"
+  },
+  "eligibility": {
+    "minimum_oos_trades": 30,
+    "positive_oos_sharpe_only_for_dsr": true
+  },
+  "multiple_testing": {
+    "candidate_count": 186,
+    "deflated_sharpe_ratio": {
+      "enabled": true,
+      "family_size_n": 186,
+      "formula_metadata": {
+        "sharpe_definition": "SR* is the observed per-bar nonannualized out-of-sample Sharpe ratio for a stitched candidate path.",
+        "dsr_formula": "DSR = Phi(((SR* - SR0) * sqrt(T - 1)) / sqrt(1 - sample_skew * SR* + ((pearson_kurtosis - 1) / 4) * SR*^2))",
+        "benchmark_formula": "SR0 = sigma_SR * ((1 - gamma) * Phi^-1(1 - 1/N) + gamma * Phi^-1(1 - exp(-1) / N))",
+        "sample_size_symbol": "T is the stitched out-of-sample bar count used to estimate SR*.",
+        "distribution_moments": {
+          "sample_skew": "sample skewness of stitched out-of-sample bar returns",
+          "pearson_kurtosis": "sample Pearson kurtosis of stitched out-of-sample bar returns with normal benchmark equal to 3"
+        },
+        "cross_sectional_dispersion": "sigma_SR is the sample standard deviation across the 186 observed candidate Sharpe ratios.",
+        "failure_conditions": [
+          "candidate is not evaluated for DSR when observed stitched out-of-sample Sharpe <= 0",
+          "candidate fails when DSR <= 0.95",
+          "candidate fails when T < 2",
+          "candidate fails when the DSR denominator is non-finite or non-positive"
+        ]
+      },
+      "positive_oos_sharpe_only": true,
+      "threshold": 0.95
+    },
+    "permutation_test": {
+      "enabled": true,
+      "permutations": 500,
+      "method": "signal-path circular shifts within each fold",
+      "seed": 42,
+      "seed_mode": "deterministic numpy SeedSequence seeded with 42",
+      "family_null": "maximum Sharpe across all 186 candidates",
+      "null_summary": "best-of-all-candidates null Sharpe across the full frozen family for each permutation draw",
+      "empirical_p_formula": "(1 + count(null >= observed)) / 501",
+      "pass_rule": {
+        "observed_sharpe_strictly_above_q95": true,
+        "empirical_p_lte": 0.05
+      }
+    }
+  },
+  "winner_selection": {
+    "all_pass_rules_must_hold": true,
+    "pass_rules": [
+      "net_oos_return > 0",
+      "oos_trades >= 30",
+      "candidate beats cost-matched buy-and-hold total return",
+      "candidate beats cost-matched buy-and-hold Sharpe",
+      "deflated_sharpe_ratio > 0.95",
+      "permutation observed Sharpe strictly above q95",
+      "permutation empirical p <= 0.05"
+    ],
+    "ranking": [
+      "deflated_sharpe_ratio descending",
+      "empirical_p ascending",
+      "frozen_tie_breakers"
+    ],
+    "frozen_tie_breakers": [
+      "hypothesis_id",
+      "symbol",
+      "timeframe",
+      "side",
+      "session_utc",
+      "mode",
+      "hold_bars",
+      "streak_length"
+    ],
+    "no_winner_result": "NO_EDGE",
+    "holdout_forbidden_without_winner": true,
+    "holdout": {
+      "window": "last 6 calendar months",
+      "burn_before_read": true,
+      "max_final_winner_count": 1
+    }
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "name": "Volume Shock Mean Reversion",
+      "economic_rationale": "Capitulation-style down moves on abnormal volume may overshoot and mean revert over short horizons.",
+      "applicability": {
+        "timeframes": [
+          "1h",
+          "4h"
+        ],
+        "timeframes_na": []
+      },
+      "signal_definition": {
+        "volume_condition": "current volume > 3 x prior SMA20(volume)",
+        "return_condition": "current-bar return z-score over the prior 20-bar baseline < -2",
+        "baseline_rule": "all rolling baselines are causal and exclude the current bar"
+      },
+      "trade_construction": {
+        "side": [
+          "long"
+        ],
+        "entry_timing": "first executable bar after signal",
+        "holding_period_bars": [
+          1,
+          3,
+          6
+        ]
+      },
+      "parameter_grid": {
+        "execution_axes": {
+          "hold_bars": [
+            1,
+            3,
+            6
+          ]
+        },
+        "model_combo_axes": [
+          "hold_bars"
+        ]
+      },
+      "expected_trial_count": 18
+    },
+    {
+      "id": "H2",
+      "name": "Realized-Volatility Compression Donchian Breakout",
+      "economic_rationale": "Breakouts from realized-volatility compression regimes may persist once price escapes a 20-bar channel.",
+      "applicability": {
+        "timeframes": [
+          "1h",
+          "4h"
+        ],
+        "timeframes_na": []
+      },
+      "signal_definition": {
+        "breakout_rule": "Donchian20 breakout",
+        "filter_rule": "realized volatility over 20 bars is below the prior rolling-year lower tercile",
+        "baseline_rule": "the rolling-year tercile is computed causally and excludes the current bar"
+      },
+      "trade_construction": {
+        "side": [
+          "long",
+          "short"
+        ],
+        "entry_timing": "first executable bar after breakout confirmation",
+        "holding_period_bars": [
+          10,
+          20,
+          40
+        ]
+      },
+      "parameter_grid": {
+        "execution_axes": {
+          "side": [
+            "long",
+            "short"
+          ],
+          "hold_bars": [
+            10,
+            20,
+            40
+          ]
+        },
+        "model_combo_axes": [
+          "side",
+          "hold_bars"
+        ]
+      },
+      "expected_trial_count": 36
+    },
+    {
+      "id": "H3",
+      "name": "Session Boundary Drift",
+      "economic_rationale": "Systematic order-flow transitions around major session boundaries may induce directional drift from one session open to the matching session close.",
+      "applicability": {
+        "timeframes": [
+          "1h"
+        ],
+        "timeframes_na": [
+          "4h"
+        ]
+      },
+      "signal_definition": {
+        "sessions_utc": {
+          "Asia": {
+            "entry_open_hours": "00:00-07:00",
+            "exit_open_hour": "08:00"
+          },
+          "USA": {
+            "entry_open_hours": "13:00-20:00",
+            "exit_open_hour": "21:00"
+          }
+        },
+        "timing_rule": "enter at each session bar open inside the named window and exit at the immediately following session-end open"
+      },
+      "trade_construction": {
+        "side": [
+          "long",
+          "short"
+        ],
+        "sessions": [
+          "Asia",
+          "USA"
+        ]
+      },
+      "parameter_grid": {
+        "execution_axes": {
+          "session_utc": [
+            "Asia",
+            "USA"
+          ],
+          "side": [
+            "long",
+            "short"
+          ]
+        },
+        "model_combo_axes": [
+          "session_utc",
+          "side"
+        ]
+      },
+      "expected_trial_count": 12
+    },
+    {
+      "id": "H4",
+      "name": "Run-Length Continuation Or Reversal",
+      "economic_rationale": "Consecutive same-sign returns can indicate either momentum continuation or exhaustion reversal, depending on regime.",
+      "applicability": {
+        "timeframes": [
+          "1h",
+          "4h"
+        ],
+        "timeframes_na": []
+      },
+      "signal_definition": {
+        "pattern_rule": "exactly N consecutive same-sign returns before signal generation",
+        "mode": [
+          "continuation",
+          "reversal"
+        ],
+        "direction_rule": "each candidate trades both signs: continuation goes long after up-streaks and short after down-streaks, while reversal inverts that mapping"
+      },
+      "trade_construction": {
+        "side_policy": "both_signs_within_candidate",
+        "holding_period_bars": [
+          1
+        ]
+      },
+      "parameter_grid": {
+        "execution_axes": {
+          "streak_length": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "mode": [
+            "continuation",
+            "reversal"
+          ]
+        },
+        "model_combo_axes": [
+          "streak_length",
+          "mode"
+        ]
+      },
+      "expected_trial_count": 48
+    },
+    {
+      "id": "H5",
+      "name": "NR7 Delayed Breakout Confirmation",
+      "economic_rationale": "Narrow-range compression can precede expansion, but requiring next-bar close confirmation reduces false triggers.",
+      "applicability": {
+        "timeframes": [
+          "1h",
+          "4h"
+        ],
+        "timeframes_na": []
+      },
+      "signal_definition": {
+        "setup_rule": "NR7 pattern",
+        "confirmation_rule": "the immediately next bar closes beyond the NR7 high or low",
+        "execution_rule": "signal is stamped at that confirmation close and fills on the following open"
+      },
+      "trade_construction": {
+        "side": [
+          "long",
+          "short"
+        ],
+        "holding_period_bars": [
+          1,
+          3,
+          6
+        ]
+      },
+      "parameter_grid": {
+        "execution_axes": {
+          "side": [
+            "long",
+            "short"
+          ],
+          "hold_bars": [
+            1,
+            3,
+            6
+          ]
+        },
+        "model_combo_axes": [
+          "side",
+          "hold_bars"
+        ]
+      },
+      "expected_trial_count": 36
+    },
+    {
+      "id": "H6",
+      "name": "Low-Entropy Realized-Volatility Compression Donchian Breakout",
+      "economic_rationale": "Breakouts may be strongest when realized-volatility compression is paired with unusually concentrated volume states, indicating latent imbalance before expansion.",
+      "applicability": {
+        "timeframes": [
+          "1h",
+          "4h"
+        ],
+        "timeframes_na": []
+      },
+      "signal_definition": {
+        "breakout_rule": "same Donchian20 breakout as H2",
+        "filter_rule_primary": "realized volatility over 20 bars is below the prior rolling-year lower tercile",
+        "filter_rule_secondary": "normalized Shannon volume entropy20 is below its prior rolling-year median",
+        "baseline_rule": "rolling-year tercile and median baselines are causal and exclude the current bar"
+      },
+      "trade_construction": {
+        "side": [
+          "long",
+          "short"
+        ],
+        "holding_period_bars": [
+          10,
+          20,
+          40
+        ]
+      },
+      "parameter_grid": {
+        "execution_axes": {
+          "side": [
+            "long",
+            "short"
+          ],
+          "hold_bars": [
+            10,
+            20,
+            40
+          ]
+        },
+        "model_combo_axes": [
+          "side",
+          "hold_bars"
+        ]
+      },
+      "expected_trial_count": 36
+    }
+  ]
+}
