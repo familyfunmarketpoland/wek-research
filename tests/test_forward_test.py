@@ -27,7 +27,13 @@ from forward_test.core import (
     run_forward_test as _core_run_forward_test,
     state_projection_hash,
 )
-from forward_test.data import OhlcvFetchResult, default_since_for_warmup, fetch_binance_ohlcv, fetch_binance_ohlcv_bundle
+from forward_test.data import (
+    OhlcvFetchResult,
+    _create_spot_binance_exchange,
+    default_since_for_warmup,
+    fetch_binance_ohlcv,
+    fetch_binance_ohlcv_bundle,
+)
 from forward_test.integrity import GENESIS_HEAD, build_ledger_entry
 from research_lab.engine import run_signal_backtest
 from research_lab.features import compute_features
@@ -778,6 +784,24 @@ def test_fetch_binance_ohlcv_paginates_warmup_and_excludes_open_candle() -> None
     assert len(exchange.calls) >= 3
     assert all(call["limit"] <= 1000 for call in exchange.calls)
     assert FIRST_ELIGIBLE - default_since_for_warmup() >= pd.Timedelta(hours=4 * 2210)
+
+
+def test_fetch_binance_default_exchange_is_spot_data_api() -> None:
+    exchange = _create_spot_binance_exchange()
+
+    assert exchange.enableRateLimit is True
+    assert exchange.options["defaultType"] == "spot"
+    assert exchange.options["fetchMarkets"] == {"types": ["spot"], "loadAllOptions": False}
+    assert exchange.urls["api"]["public"] == "https://data-api.binance.vision/api/v3"
+    assert exchange.sign("exchangeInfo", "public", "GET", {})["url"] == (
+        "https://data-api.binance.vision/api/v3/exchangeInfo"
+    )
+    assert exchange.sign(
+        "klines",
+        "public",
+        "GET",
+        {"symbol": "SOLUSDT", "interval": "4h"},
+    )["url"] == "https://data-api.binance.vision/api/v3/klines?symbol=SOLUSDT&interval=4h"
 
 
 def test_runner_uses_one_run_now_for_fetch_and_core(monkeypatch: pytest.MonkeyPatch) -> None:

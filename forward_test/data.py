@@ -7,6 +7,9 @@ from typing import Any
 import pandas as pd
 
 
+_BINANCE_MARKET_DATA_BASE = "https://data-api.binance.vision/api/v3"
+
+
 @dataclass(frozen=True)
 class OhlcvFetchResult:
     completed: pd.DataFrame
@@ -52,9 +55,7 @@ def fetch_binance_ohlcv_bundle(
     """
 
     if exchange is None:
-        import ccxt  # type: ignore[import-not-found]
-
-        exchange = ccxt.binance({"enableRateLimit": True})
+        exchange = _create_spot_binance_exchange()
     per_page = min(int(limit), 1000)
     if per_page <= 0:
         raise ValueError("limit must be positive")
@@ -103,6 +104,33 @@ def fetch_binance_ohlcv_bundle(
     frame = ohlcv_rows_to_frame([rows_by_timestamp[key] for key in sorted(rows_by_timestamp)])
     _validate_continuity(frame, delta)
     return OhlcvFetchResult(completed=frame, current_open=current_open)
+
+
+def _create_spot_binance_exchange() -> Any:
+    import ccxt  # type: ignore[import-not-found]
+
+    exchange = ccxt.binance(
+        {
+            "enableRateLimit": True,
+            "options": {
+                "defaultType": "spot",
+                "fetchMarkets": {"types": ["spot"], "loadAllOptions": False},
+            },
+        }
+    )
+    exchange.options["defaultType"] = "spot"
+    api_urls = exchange.urls.get("api")
+    if isinstance(api_urls, dict):
+        api_urls["public"] = _BINANCE_MARKET_DATA_BASE
+    else:
+        exchange.urls["api"] = {"public": _BINANCE_MARKET_DATA_BASE}
+    fetch_markets = exchange.options.get("fetchMarkets")
+    if isinstance(fetch_markets, dict):
+        fetch_markets["types"] = ["spot"]
+        fetch_markets["loadAllOptions"] = False
+    else:
+        exchange.options["fetchMarkets"] = {"types": ["spot"], "loadAllOptions": False}
+    return exchange
 
 
 def ohlcv_rows_to_frame(rows: list[list[float]]) -> pd.DataFrame:
