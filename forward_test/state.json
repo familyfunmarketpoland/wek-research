@@ -3,7 +3,7 @@
     "entry_cost_rate": 0.0015,
     "entry_open_utc": "2026-07-25T00:00:00Z",
     "entry_price": 73.97,
-    "equity": 0.9893208733270248,
+    "equity": 0.9881059889144251,
     "equity_curve": [
       {
         "equity": 0.9985,
@@ -99,30 +99,39 @@
         "equity": 0.9893208733270248,
         "mark": "open",
         "open_utc": "2026-07-28T08:00:00Z"
+      },
+      {
+        "equity": 0.9881059889144251,
+        "open_utc": "2026-07-28T08:00:00Z"
+      },
+      {
+        "equity": 0.9881059889144251,
+        "mark": "open",
+        "open_utc": "2026-07-28T12:00:00Z"
       }
     ],
     "name": "SOL/USDT buy-and-hold",
-    "net_return": -0.010679126672975214,
+    "net_return": -0.011894011085574863,
     "position": 1
   },
   "candidate_id": "H2|solusdt|4h|side-short|hold_bars-20",
   "closed_trades": [],
   "closed_trades_count": 0,
   "created_at_utc": "2026-07-24T12:15:17Z",
-  "eligible_index": 19,
-  "equity": 0.9983636674557809,
+  "eligible_index": 20,
+  "equity": 0.9995896564047646,
   "first_eligible_open_utc": "2026-07-25T00:00:00Z",
   "hashes": {
-    "ledger_head": "d435a32b563345adb7a7b2af7a42668db411d765cb6e85142dc55f9f680fe98a",
+    "ledger_head": "a3bc962a3500df70dc4632c479ea3082f6acdad0bc12e376113d30dc4d017311",
     "parameter_sha256": "a81471a4f44ed58246ef63bb4de420505aac8d725402bdcef9954e04497eac78",
     "prereg_sha256": "0e83bddc6fea02ef19fdca69a0face24358da57a8901ca4d8849c0eca9b97c2b"
   },
   "high_watermark": 1.0,
-  "last_close": 73.3,
-  "last_open_mark_utc": "2026-07-28T08:00:00Z",
-  "last_processed_open_utc": "2026-07-28T04:00:00Z",
-  "ledger_entries": 43,
-  "ledger_head": "d435a32b563345adb7a7b2af7a42668db411d765cb6e85142dc55f9f680fe98a",
+  "last_close": 73.2,
+  "last_open_mark_utc": "2026-07-28T12:00:00Z",
+  "last_processed_open_utc": "2026-07-28T08:00:00Z",
+  "ledger_entries": 46,
+  "ledger_head": "a3bc962a3500df70dc4632c479ea3082f6acdad0bc12e376113d30dc4d017311",
   "max_drawdown": 0.0017725163755456519,
   "observations": {
     "2026-07-25T00:00:00Z": "a80a9b5b7f63bbb5178ccec68d95f10f3cdc432c8d78f8fc3190319d93974771",
@@ -144,7 +153,8 @@
     "2026-07-27T16:00:00Z": "1348d0153cdf4255c84c80c5825244fa07798aaae31105c528dfafe11282bd53",
     "2026-07-27T20:00:00Z": "27686915163426c99ea0123e89898f2a9e0b79a2fcbcc63fd01a3cb392170938",
     "2026-07-28T00:00:00Z": "1c7ff06cbf870601f5f122316cbb9ebf0b327ac6163c13dc05ed5e4a723c6cf6",
-    "2026-07-28T04:00:00Z": "fd2c3fe4bf314f057374a3a7ed50bf1b027b102789df18442e5763229035f8fc"
+    "2026-07-28T04:00:00Z": "fd2c3fe4bf314f057374a3a7ed50bf1b027b102789df18442e5763229035f8fc",
+    "2026-07-28T08:00:00Z": "b4bf685ed5abfbd5886e43626b840c77eabf5f3827efab0e8207a77f7eee05ba"
   },
   "open_marks": {
     "2026-07-25T00:00:00Z": {
@@ -209,6 +219,9 @@
     },
     "2026-07-28T08:00:00Z": {
       "open": 73.29
+    },
+    "2026-07-28T12:00:00Z": {
+      "open": 73.2
     }
   },
   "open_trade": {
@@ -311,20 +324,29 @@
         "equity": 0.9983636674557809,
         "mark": "open",
         "open_utc": "2026-07-28T08:00:00Z"
+      },
+      {
+        "equity": 0.9995896564047646,
+        "open_utc": "2026-07-28T08:00:00Z"
+      },
+      {
+        "equity": 0.9995896564047646,
+        "mark": "open",
+        "open_utc": "2026-07-28T12:00:00Z"
       }
     ],
     "initial_equity": 1.0,
-    "net_return": -0.0016363325442191323,
+    "net_return": -0.0004103435952353962,
     "per_trade_sharpe": null
   },
   "position": -1,
   "prereg_commit": "16c82a3",
   "prereg_sha256": "0e83bddc6fea02ef19fdca69a0face24358da57a8901ca4d8849c0eca9b97c2b",
   "schema_version": 1,
-  "state_checkpoint_sha256": "16c321115bafa4b7b056d3eaebe3562c181a9e4b63301a6252107700255b6f10",
+  "state_checkpoint_sha256": "dedca87b0bf17a117a9d91bfd2b7e911fd181bda9ab0c079e5f6996d130473e7",
   "status": "RUNNING",
   "study_id": "h2_solusdt_4h_short_hold20_forward_2026",
   "terminal": null,
   "underpowered_deadline_utc": "2027-07-25T00:00:00Z",
-  "updated_at_utc": "2026-07-28T10:46:30Z"
+  "updated_at_utc": "2026-07-28T14:41:41Z"
 }
