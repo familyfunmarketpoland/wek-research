@@ -3,7 +3,7 @@
     "entry_cost_rate": 0.0015,
     "entry_open_utc": "2026-07-25T00:00:00Z",
     "entry_price": 73.97,
-    "equity": 1.009433959713398,
+    "equity": 1.0059242936325543,
     "equity_curve": [
       {
         "equity": 0.9985,
@@ -234,30 +234,39 @@
         "equity": 1.009433959713398,
         "mark": "open",
         "open_utc": "2026-07-30T20:00:00Z"
+      },
+      {
+        "equity": 1.005789306475599,
+        "open_utc": "2026-07-30T20:00:00Z"
+      },
+      {
+        "equity": 1.0059242936325543,
+        "mark": "open",
+        "open_utc": "2026-07-31T00:00:00Z"
       }
     ],
     "name": "SOL/USDT buy-and-hold",
-    "net_return": 0.00943395971339811,
+    "net_return": 0.005924293632554312,
     "position": 1
   },
   "candidate_id": "H2|solusdt|4h|side-short|hold_bars-20",
   "closed_trades": [],
   "closed_trades_count": 0,
   "created_at_utc": "2026-07-24T12:15:17Z",
-  "eligible_index": 34,
-  "equity": 0.9773431849195143,
+  "eligible_index": 35,
+  "equity": 0.980740328495392,
   "first_eligible_open_utc": "2026-07-25T00:00:00Z",
   "hashes": {
-    "ledger_head": "400686ccfc3646961ced0ffdd25890f7d1ac6074bcadade443f6306c43422a48",
+    "ledger_head": "140cb1fb27fa9aaa4ccc36894fe178bdbe7007830149048e90b949c8b561a02c",
     "parameter_sha256": "a81471a4f44ed58246ef63bb4de420505aac8d725402bdcef9954e04497eac78",
     "prereg_sha256": "0e83bddc6fea02ef19fdca69a0face24358da57a8901ca4d8849c0eca9b97c2b"
   },
   "high_watermark": 1.0048131431412304,
-  "last_close": 74.78,
-  "last_open_mark_utc": "2026-07-30T20:00:00Z",
-  "last_processed_open_utc": "2026-07-30T16:00:00Z",
-  "ledger_entries": 88,
-  "ledger_head": "400686ccfc3646961ced0ffdd25890f7d1ac6074bcadade443f6306c43422a48",
+  "last_close": 74.51,
+  "last_open_mark_utc": "2026-07-31T00:00:00Z",
+  "last_processed_open_utc": "2026-07-30T20:00:00Z",
+  "ledger_entries": 91,
+  "ledger_head": "140cb1fb27fa9aaa4ccc36894fe178bdbe7007830149048e90b949c8b561a02c",
   "max_drawdown": 0.02733837471098355,
   "observations": {
     "2026-07-25T00:00:00Z": "a80a9b5b7f63bbb5178ccec68d95f10f3cdc432c8d78f8fc3190319d93974771",
@@ -294,7 +303,8 @@
     "2026-07-30T04:00:00Z": "b3d2973f0f6eaadfe49e01e13ab25a8be52febc9bb34a37646b02b119f9e1df5",
     "2026-07-30T08:00:00Z": "79cf8848feef0057aee1455594cd300859352ad1daa0a979178d69eb293014b6",
     "2026-07-30T12:00:00Z": "2682c223470ef2c8f199399bcaec8384af464172963f57bc85b76d7be801d527",
-    "2026-07-30T16:00:00Z": "2528c71385bb875ba2325bfc8eef89491edbc23f12e9b73b49c9881fe4df8559"
+    "2026-07-30T16:00:00Z": "2528c71385bb875ba2325bfc8eef89491edbc23f12e9b73b49c9881fe4df8559",
+    "2026-07-30T20:00:00Z": "05dde29221acd1d1653f4dd519d2449e78838f567782ce62c1950b490a745346"
   },
   "open_marks": {
     "2026-07-25T00:00:00Z": {
@@ -404,6 +414,9 @@
     },
     "2026-07-30T20:00:00Z": {
       "open": 74.78
+    },
+    "2026-07-31T00:00:00Z": {
+      "open": 74.52
     }
   },
   "open_trade": {
@@ -641,20 +654,29 @@
         "equity": 0.9773431849195143,
         "mark": "open",
         "open_utc": "2026-07-30T20:00:00Z"
+      },
+      {
+        "equity": 0.9808719714925054,
+        "open_utc": "2026-07-30T20:00:00Z"
+      },
+      {
+        "equity": 0.980740328495392,
+        "mark": "open",
+        "open_utc": "2026-07-31T00:00:00Z"
       }
     ],
     "initial_equity": 1.0,
-    "net_return": -0.02265681508048567,
+    "net_return": -0.019259671504607945,
     "per_trade_sharpe": null
   },
   "position": -1,
   "prereg_commit": "16c82a3",
   "prereg_sha256": "0e83bddc6fea02ef19fdca69a0face24358da57a8901ca4d8849c0eca9b97c2b",
   "schema_version": 1,
-  "state_checkpoint_sha256": "2ada31d7db8e05411b3fdb06b91e2f53667791d4de2ed3b4d6ce176cdc3b474a",
+  "state_checkpoint_sha256": "b456459201d78d9a43b44ac6f05660c21bca306fb399471cb81d22061f6e8713",
   "status": "RUNNING",
   "study_id": "h2_solusdt_4h_short_hold20_forward_2026",
   "terminal": null,
   "underpowered_deadline_utc": "2027-07-25T00:00:00Z",
-  "updated_at_utc": "2026-07-30T21:34:34Z"
+  "updated_at_utc": "2026-07-31T03:53:48Z"
 }
