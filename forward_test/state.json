@@ -3,7 +3,7 @@
     "entry_cost_rate": 0.0015,
     "entry_open_utc": "2026-07-25T00:00:00Z",
     "entry_price": 73.97,
-    "equity": 0.9948553467622012,
+    "equity": 0.9945853724482903,
     "equity_curve": [
       {
         "equity": 0.9985,
@@ -433,10 +433,19 @@
         "equity": 0.9948553467622012,
         "mark": "open",
         "open_utc": "2026-08-04T04:00:00Z"
+      },
+      {
+        "equity": 0.9945853724482903,
+        "open_utc": "2026-08-04T04:00:00Z"
+      },
+      {
+        "equity": 0.9945853724482903,
+        "mark": "open",
+        "open_utc": "2026-08-04T08:00:00Z"
       }
     ],
     "name": "SOL/USDT buy-and-hold",
-    "net_return": -0.00514465323779878,
+    "net_return": -0.005414627551709739,
     "position": 1
   },
   "candidate_id": "H2|solusdt|4h|side-short|hold_bars-20",
@@ -455,20 +464,20 @@
   ],
   "closed_trades_count": 1,
   "created_at_utc": "2026-07-24T12:15:17Z",
-  "eligible_index": 60,
-  "equity": 0.9566117969546165,
+  "eligible_index": 61,
+  "equity": 0.9568713931003301,
   "first_eligible_open_utc": "2026-07-25T00:00:00Z",
   "hashes": {
-    "ledger_head": "f0f6a2fafa73f909b2f6462e8b4f07c43136b28b8a27de6c3fea170db707540c",
+    "ledger_head": "9c9c801425736c5ff759043d895c81076579fa5f2e5ed3400397bb6c1b720e1d",
     "parameter_sha256": "a81471a4f44ed58246ef63bb4de420505aac8d725402bdcef9954e04497eac78",
     "prereg_sha256": "0e83bddc6fea02ef19fdca69a0face24358da57a8901ca4d8849c0eca9b97c2b"
   },
   "high_watermark": 1.0048131431412304,
-  "last_close": 73.7,
-  "last_open_mark_utc": "2026-08-04T04:00:00Z",
-  "last_processed_open_utc": "2026-08-04T00:00:00Z",
-  "ledger_entries": 160,
-  "ledger_head": "f0f6a2fafa73f909b2f6462e8b4f07c43136b28b8a27de6c3fea170db707540c",
+  "last_close": 73.68,
+  "last_open_mark_utc": "2026-08-04T08:00:00Z",
+  "last_processed_open_utc": "2026-08-04T04:00:00Z",
+  "ledger_entries": 163,
+  "ledger_head": "9c9c801425736c5ff759043d895c81076579fa5f2e5ed3400397bb6c1b720e1d",
   "max_drawdown": 0.05204456958013881,
   "observations": {
     "2026-07-25T00:00:00Z": "a80a9b5b7f63bbb5178ccec68d95f10f3cdc432c8d78f8fc3190319d93974771",
@@ -531,7 +540,8 @@
     "2026-08-03T12:00:00Z": "e936fbd13eb322cb81270c1ef9e6c5abcf8ed60bc8384c5d71310d9712410500",
     "2026-08-03T16:00:00Z": "949911a025c5392b33e2f5bf1d8f356a02d73a13383c9a76c02abbc85855343b",
     "2026-08-03T20:00:00Z": "b084bbf1747eced1d651135b63d8334d689dd68f117bbf7be083fd8fc1bc6b9f",
-    "2026-08-04T00:00:00Z": "9cec4e4695f325ac42f89f1300f652b2825edd0768030b1f7d5ee4e6d453f54c"
+    "2026-08-04T00:00:00Z": "9cec4e4695f325ac42f89f1300f652b2825edd0768030b1f7d5ee4e6d453f54c",
+    "2026-08-04T04:00:00Z": "3efb807f1b77bd02203675ce767b93bb44e256e703cfe296ffd85878d9a5070a"
   },
   "open_marks": {
     "2026-07-25T00:00:00Z": {
@@ -719,6 +729,9 @@
     },
     "2026-08-04T04:00:00Z": {
       "open": 73.7
+    },
+    "2026-08-04T08:00:00Z": {
+      "open": 73.68
     }
   },
   "open_trade": {
@@ -1155,20 +1168,29 @@
         "equity": 0.9566117969546165,
         "mark": "open",
         "open_utc": "2026-08-04T04:00:00Z"
+      },
+      {
+        "equity": 0.9568713931003301,
+        "open_utc": "2026-08-04T04:00:00Z"
+      },
+      {
+        "equity": 0.9568713931003301,
+        "mark": "open",
+        "open_utc": "2026-08-04T08:00:00Z"
       }
     ],
     "initial_equity": 1.0,
-    "net_return": -0.04338820304538349,
+    "net_return": -0.04312860689966991,
     "per_trade_sharpe": null
   },
   "position": -1,
   "prereg_commit": "16c82a3",
   "prereg_sha256": "0e83bddc6fea02ef19fdca69a0face24358da57a8901ca4d8849c0eca9b97c2b",
   "schema_version": 1,
-  "state_checkpoint_sha256": "41380723a7aed31528c91e88ea83e0bde918e89fcce271c0c2d8eb8fffc4d549",
+  "state_checkpoint_sha256": "92f606034624911f7b43df2ec2dd1c218d331545521314671f890f640171e520",
   "status": "RUNNING",
   "study_id": "h2_solusdt_4h_short_hold20_forward_2026",
   "terminal": null,
   "underpowered_deadline_utc": "2027-07-25T00:00:00Z",
-  "updated_at_utc": "2026-08-04T06:43:02Z"
+  "updated_at_utc": "2026-08-04T10:58:57Z"
 }
