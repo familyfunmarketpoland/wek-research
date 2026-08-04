@@ -3,7 +3,7 @@
     "entry_cost_rate": 0.0015,
     "entry_open_utc": "2026-07-25T00:00:00Z",
     "entry_price": 73.97,
-    "equity": 0.9987699743139112,
+    "equity": 1.0014697174530218,
     "equity_curve": [
       {
         "equity": 0.9985,
@@ -460,10 +460,19 @@
         "equity": 0.9987699743139112,
         "mark": "open",
         "open_utc": "2026-08-04T16:00:00Z"
+      },
+      {
+        "equity": 1.0014697174530218,
+        "open_utc": "2026-08-04T16:00:00Z"
+      },
+      {
+        "equity": 1.0014697174530218,
+        "mark": "open",
+        "open_utc": "2026-08-04T20:00:00Z"
       }
     ],
     "name": "SOL/USDT buy-and-hold",
-    "net_return": -0.0012300256860887648,
+    "net_return": 0.0014697174530218238,
     "position": 1
   },
   "candidate_id": "H2|solusdt|4h|side-short|hold_bars-20",
@@ -482,21 +491,21 @@
   ],
   "closed_trades_count": 1,
   "created_at_utc": "2026-07-24T12:15:17Z",
-  "eligible_index": 63,
-  "equity": 0.9528492617212039,
+  "eligible_index": 64,
+  "equity": 0.9502736453900207,
   "first_eligible_open_utc": "2026-07-25T00:00:00Z",
   "hashes": {
-    "ledger_head": "08f73f7ef7ef27d456eedf31aa71ff2847c173f80dbd0232184e169478bebf9e",
+    "ledger_head": "bef750fed20d380eafc1ed61efa19968a19c8bd762df329bfaae9b93293d7cae",
     "parameter_sha256": "a81471a4f44ed58246ef63bb4de420505aac8d725402bdcef9954e04497eac78",
     "prereg_sha256": "0e83bddc6fea02ef19fdca69a0face24358da57a8901ca4d8849c0eca9b97c2b"
   },
   "high_watermark": 1.0048131431412304,
-  "last_close": 73.99,
-  "last_open_mark_utc": "2026-08-04T16:00:00Z",
-  "last_processed_open_utc": "2026-08-04T12:00:00Z",
-  "ledger_entries": 169,
-  "ledger_head": "08f73f7ef7ef27d456eedf31aa71ff2847c173f80dbd0232184e169478bebf9e",
-  "max_drawdown": 0.05204456958013881,
+  "last_close": 74.19,
+  "last_open_mark_utc": "2026-08-04T20:00:00Z",
+  "last_processed_open_utc": "2026-08-04T16:00:00Z",
+  "ledger_entries": 172,
+  "ledger_head": "bef750fed20d380eafc1ed61efa19968a19c8bd762df329bfaae9b93293d7cae",
+  "max_drawdown": 0.05427824877042231,
   "observations": {
     "2026-07-25T00:00:00Z": "a80a9b5b7f63bbb5178ccec68d95f10f3cdc432c8d78f8fc3190319d93974771",
     "2026-07-25T04:00:00Z": "b30392c00f110575866e2d3c83518c97337b39b539b00380e7bbd19c4fdc1a7a",
@@ -561,7 +570,8 @@
     "2026-08-04T00:00:00Z": "9cec4e4695f325ac42f89f1300f652b2825edd0768030b1f7d5ee4e6d453f54c",
     "2026-08-04T04:00:00Z": "3efb807f1b77bd02203675ce767b93bb44e256e703cfe296ffd85878d9a5070a",
     "2026-08-04T08:00:00Z": "04b359dfb529dc0ad127763ba32ab1b00083da95b3ad5fb119ee0cd2444b38a2",
-    "2026-08-04T12:00:00Z": "8282e88fa4d7d94356e5ae2d0524fa9d96fc731566309b3a528dc10fa5f09ce0"
+    "2026-08-04T12:00:00Z": "8282e88fa4d7d94356e5ae2d0524fa9d96fc731566309b3a528dc10fa5f09ce0",
+    "2026-08-04T16:00:00Z": "fc12b559b9574725ce3702002b9693dc2f433e9cc66ec58c052727bf1275056a"
   },
   "open_marks": {
     "2026-07-25T00:00:00Z": {
@@ -758,6 +768,9 @@
     },
     "2026-08-04T16:00:00Z": {
       "open": 73.99
+    },
+    "2026-08-04T20:00:00Z": {
+      "open": 74.19
     }
   },
   "open_trade": {
@@ -1221,20 +1234,29 @@
         "equity": 0.9528492617212039,
         "mark": "open",
         "open_utc": "2026-08-04T16:00:00Z"
+      },
+      {
+        "equity": 0.9502736453900207,
+        "open_utc": "2026-08-04T16:00:00Z"
+      },
+      {
+        "equity": 0.9502736453900207,
+        "mark": "open",
+        "open_utc": "2026-08-04T20:00:00Z"
       }
     ],
     "initial_equity": 1.0,
-    "net_return": -0.04715073827879612,
+    "net_return": -0.04972635460997932,
     "per_trade_sharpe": null
   },
   "position": -1,
   "prereg_commit": "16c82a3",
   "prereg_sha256": "0e83bddc6fea02ef19fdca69a0face24358da57a8901ca4d8849c0eca9b97c2b",
   "schema_version": 1,
-  "state_checkpoint_sha256": "96a75ef349ef8b367afda028e7be5f35d706f1399b283b168b7ec1a33e7f538b",
+  "state_checkpoint_sha256": "69d755f072363c46fe1aecce27fa20304c0a3191243f6414e03ad29118e3d477",
   "status": "RUNNING",
   "study_id": "h2_solusdt_4h_short_hold20_forward_2026",
   "terminal": null,
   "underpowered_deadline_utc": "2027-07-25T00:00:00Z",
-  "updated_at_utc": "2026-08-04T18:05:30Z"
+  "updated_at_utc": "2026-08-04T21:39:08Z"
 }
