@@ -3,7 +3,7 @@
     "entry_cost_rate": 0.0015,
     "entry_open_utc": "2026-07-25T00:00:00Z",
     "entry_price": 73.97,
-    "equity": 1.3776789238880645,
+    "equity": 1.3671499256455337,
     "equity_curve": [
       {
         "equity": 0.9985,
@@ -1491,10 +1491,19 @@
         "equity": 1.3776789238880645,
         "mark": "open",
         "open_utc": "2026-09-12T16:00:00Z"
+      },
+      {
+        "equity": 1.3670149384885781,
+        "open_utc": "2026-09-12T16:00:00Z"
+      },
+      {
+        "equity": 1.3671499256455337,
+        "mark": "open",
+        "open_utc": "2026-09-12T20:00:00Z"
       }
     ],
     "name": "SOL/USDT buy-and-hold",
-    "net_return": 0.37767892388806446,
+    "net_return": 0.3671499256455337,
     "position": 1
   },
   "candidate_id": "H2|solusdt|4h|side-short|hold_bars-20",
@@ -1535,20 +1544,20 @@
   ],
   "closed_trades_count": 3,
   "created_at_utc": "2026-07-24T12:15:17Z",
-  "eligible_index": 297,
-  "equity": 0.9255643041169587,
+  "eligible_index": 298,
+  "equity": 0.9326365729000019,
   "first_eligible_open_utc": "2026-07-25T00:00:00Z",
   "hashes": {
-    "ledger_head": "1f846dec37b22740b4d66b1983fe9c517c0544516be0e8f7ade8ce43cc9fd8bb",
+    "ledger_head": "737960b864eac1f77fad9fb4c54f8db4b1c7f1d9dd4d31999827313b2fcae6db",
     "parameter_sha256": "a81471a4f44ed58246ef63bb4de420505aac8d725402bdcef9954e04497eac78",
     "prereg_sha256": "0e83bddc6fea02ef19fdca69a0face24358da57a8901ca4d8849c0eca9b97c2b"
   },
   "high_watermark": 1.0048131431412304,
-  "last_close": 102.06,
-  "last_open_mark_utc": "2026-09-12T16:00:00Z",
-  "last_processed_open_utc": "2026-09-12T12:00:00Z",
-  "ledger_entries": 624,
-  "ledger_head": "1f846dec37b22740b4d66b1983fe9c517c0544516be0e8f7ade8ce43cc9fd8bb",
+  "last_close": 101.27,
+  "last_open_mark_utc": "2026-09-12T20:00:00Z",
+  "last_processed_open_utc": "2026-09-12T16:00:00Z",
+  "ledger_entries": 627,
+  "ledger_head": "737960b864eac1f77fad9fb4c54f8db4b1c7f1d9dd4d31999827313b2fcae6db",
   "max_drawdown": 0.08238772020835927,
   "observations": {
     "2026-07-25T00:00:00Z": "a80a9b5b7f63bbb5178ccec68d95f10f3cdc432c8d78f8fc3190319d93974771",
@@ -1848,7 +1857,8 @@
     "2026-09-12T00:00:00Z": "9e5f04a2e5d12c72e033a9cf68c21a409c1710179c8d6f269e5352e7830269e2",
     "2026-09-12T04:00:00Z": "94a50cd3c26cab4a152d34321871ac4145b91a9bfe215bc3efc4839859d519a9",
     "2026-09-12T08:00:00Z": "84542380ef5b1e46dd8ab993e41a8bdddc5fd86eb841b7e9e27fc975cba3afc0",
-    "2026-09-12T12:00:00Z": "1d4e0fa13b43add72ad5e90dd0ed5c1d555a7652e5c58948a88e67b5a99fd88d"
+    "2026-09-12T12:00:00Z": "1d4e0fa13b43add72ad5e90dd0ed5c1d555a7652e5c58948a88e67b5a99fd88d",
+    "2026-09-12T16:00:00Z": "fac74be32a85d70e4ea6902091647c407fb696d7e1fbba3bad8779091bb69f0a"
   },
   "open_marks": {
     "2026-07-25T00:00:00Z": {
@@ -2747,6 +2757,9 @@
     },
     "2026-09-12T16:00:00Z": {
       "open": 102.06
+    },
+    "2026-09-12T20:00:00Z": {
+      "open": 101.28
     }
   },
   "open_trade": {
@@ -4241,20 +4254,29 @@
         "equity": 0.9255643041169587,
         "mark": "open",
         "open_utc": "2026-09-12T16:00:00Z"
+      },
+      {
+        "equity": 0.9327286760575073,
+        "open_utc": "2026-09-12T16:00:00Z"
+      },
+      {
+        "equity": 0.9326365729000019,
+        "mark": "open",
+        "open_utc": "2026-09-12T20:00:00Z"
       }
     ],
     "initial_equity": 1.0,
-    "net_return": -0.07443569588304133,
+    "net_return": -0.0673634270999981,
     "per_trade_sharpe": -1.531658894404913
   },
   "position": -1,
   "prereg_commit": "16c82a3",
   "prereg_sha256": "0e83bddc6fea02ef19fdca69a0face24358da57a8901ca4d8849c0eca9b97c2b",
   "schema_version": 1,
-  "state_checkpoint_sha256": "840bf980c820e96a97ee560d56ba19e9dc75901351365dfdb4a7382ace5de847",
+  "state_checkpoint_sha256": "3b575215be664c483c05955de8937dd1d166fc5250b20b8c1edafafd48f62551",
   "status": "RUNNING",
   "study_id": "h2_solusdt_4h_short_hold20_forward_2026",
   "terminal": null,
   "underpowered_deadline_utc": "2027-07-25T00:00:00Z",
-  "updated_at_utc": "2026-09-12T18:26:49Z"
+  "updated_at_utc": "2026-09-12T22:21:03Z"
 }
