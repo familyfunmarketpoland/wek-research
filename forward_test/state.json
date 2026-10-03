@@ -3,7 +3,7 @@
     "entry_cost_rate": 0.0015,
     "entry_open_utc": "2026-07-25T00:00:00Z",
     "entry_price": 73.97,
-    "equity": 1.592848452075169,
+    "equity": 1.6117466540489422,
     "equity_curve": [
       {
         "equity": 0.9985,
@@ -2035,10 +2035,18 @@
       {
         "equity": 1.592848452075169,
         "open_utc": "2026-10-02T16:00:00Z"
+      },
+      {
+        "equity": 1.601622617277278,
+        "open_utc": "2026-10-02T20:00:00Z"
+      },
+      {
+        "equity": 1.6117466540489422,
+        "open_utc": "2026-10-03T00:00:00Z"
       }
     ],
     "name": "SOL/USDT buy-and-hold",
-    "net_return": 0.5928484520751689,
+    "net_return": 0.6117466540489422,
     "position": 1
   },
   "candidate_id": "H2|solusdt|4h|side-short|hold_bars-20",
@@ -2101,20 +2109,20 @@
   ],
   "closed_trades_count": 5,
   "created_at_utc": "2026-07-24T12:15:17Z",
-  "eligible_index": 418,
+  "eligible_index": 420,
   "equity": 0.8624085437509627,
   "first_eligible_open_utc": "2026-07-25T00:00:00Z",
   "hashes": {
-    "ledger_head": "90f75c2f848376ebfeb8124dcd13c567fc01a52a1863b1951a9e0599026db550",
+    "ledger_head": "f21f945ad079e1897889baf23a4c97df092bdaa7bbb15354372850d30a366142",
     "parameter_sha256": "a81471a4f44ed58246ef63bb4de420505aac8d725402bdcef9954e04497eac78",
     "prereg_sha256": "0e83bddc6fea02ef19fdca69a0face24358da57a8901ca4d8849c0eca9b97c2b"
   },
   "high_watermark": 1.0048131431412304,
-  "last_close": 118.0,
-  "last_open_mark_utc": "2026-10-02T16:00:00Z",
-  "last_processed_open_utc": "2026-10-02T16:00:00Z",
-  "ledger_entries": 839,
-  "ledger_head": "90f75c2f848376ebfeb8124dcd13c567fc01a52a1863b1951a9e0599026db550",
+  "last_close": 119.4,
+  "last_open_mark_utc": "2026-10-03T00:00:00Z",
+  "last_processed_open_utc": "2026-10-03T00:00:00Z",
+  "ledger_entries": 842,
+  "ledger_head": "f21f945ad079e1897889baf23a4c97df092bdaa7bbb15354372850d30a366142",
   "max_drawdown": 0.14172246886130968,
   "observations": {
     "2026-07-25T00:00:00Z": "a80a9b5b7f63bbb5178ccec68d95f10f3cdc432c8d78f8fc3190319d93974771",
@@ -2535,7 +2543,9 @@
     "2026-10-02T04:00:00Z": "a3651375fc47a9c85ea11a6846269a7335a8d987f3d0ea6ed059a9c13007b6b6",
     "2026-10-02T08:00:00Z": "94788b6ba7c3f324c875f525fdb17606be54e15aa61772b57b3d2bbe4ebce988",
     "2026-10-02T12:00:00Z": "2344178936114e58aad1769d8fe48de44edbf7ceeed52a216d6eea85a00d1933",
-    "2026-10-02T16:00:00Z": "88bfff7390b3161c383cc68d2c459ede449577967f1c7bed99ce9937ff74c2a1"
+    "2026-10-02T16:00:00Z": "88bfff7390b3161c383cc68d2c459ede449577967f1c7bed99ce9937ff74c2a1",
+    "2026-10-02T20:00:00Z": "ef718c48cc23a496e02ee375bd11c319ad0e1aa3fd4ecaa4ab99a2ccaff5ed95",
+    "2026-10-03T00:00:00Z": "2e94b1a30795ab424bbff3780c1640538a46b076e23de2bf9973b8bd9a03da11"
   },
   "open_marks": {
     "2026-07-25T00:00:00Z": {
@@ -3794,6 +3804,12 @@
     },
     "2026-10-02T16:00:00Z": {
       "open": 119.98
+    },
+    "2026-10-02T20:00:00Z": {
+      "open": 118.0
+    },
+    "2026-10-03T00:00:00Z": {
+      "open": 118.65
     }
   },
   "open_trade": null,
@@ -5826,6 +5842,14 @@
       {
         "equity": 0.8624085437509627,
         "open_utc": "2026-10-02T16:00:00Z"
+      },
+      {
+        "equity": 0.8624085437509627,
+        "open_utc": "2026-10-02T20:00:00Z"
+      },
+      {
+        "equity": 0.8624085437509627,
+        "open_utc": "2026-10-03T00:00:00Z"
       }
     ],
     "initial_equity": 1.0,
@@ -5836,10 +5860,10 @@
   "prereg_commit": "16c82a3",
   "prereg_sha256": "0e83bddc6fea02ef19fdca69a0face24358da57a8901ca4d8849c0eca9b97c2b",
   "schema_version": 1,
-  "state_checkpoint_sha256": "7aa3ce99815dfd027e549533aa39d3c28004a94955ba1add34636925e5902bc5",
+  "state_checkpoint_sha256": "3d5ad99ac0713a8ad1a9f93c188a570a6454649113150b1986017341a268f9ec",
   "status": "RUNNING",
   "study_id": "h2_solusdt_4h_short_hold20_forward_2026",
   "terminal": null,
   "underpowered_deadline_utc": "2027-07-25T00:00:00Z",
-  "updated_at_utc": "2026-10-02T20:47:33Z"
+  "updated_at_utc": "2026-10-03T05:23:29Z"
 }
